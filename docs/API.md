@@ -16,6 +16,50 @@ GET /api/health
 
 Returns API status, locale, redacted database path, and migration counts.
 
+## Authentication
+
+Production deployments require `APP_ADMIN_PASSWORD` and `SESSION_SECRET`.
+When an admin password is configured, all `/api` data routes are protected by
+an HTTP-only session cookie. `/api/health` and `/api/auth/*` remain public.
+
+### Auth Status
+
+```http
+GET /api/auth/status
+```
+
+Response:
+
+```json
+{
+  "authenticated": false,
+  "authRequired": true
+}
+```
+
+### Login
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "password": "admin-password-from-env"
+}
+```
+
+Successful login sets the `family_registry_session` HTTP-only cookie.
+
+### Logout
+
+```http
+POST /api/auth/logout
+```
+
 ## People
 
 ### List People
@@ -191,6 +235,8 @@ GET /api/people/:id/graph?depth=2
 Returns selected-person graph nodes and relationship edges.
 
 Depth is capped server-side.
+Large high-degree graphs are also capped server-side to keep the UI responsive.
+When the response is limited, `truncated` is `true`.
 
 Response:
 
@@ -213,7 +259,8 @@ Response:
         "target": "father-id",
         "relationshipType": "father"
       }
-    ]
+    ],
+    "truncated": false
   }
 }
 ```
@@ -336,6 +383,8 @@ GET /api/export/backup
 ```http
 POST /api/restore/backup
 Content-Type: application/json
+X-Restore-Confirmation: RESTORE_FAMILY_REGISTRY
 ```
 
 Restore is destructive. It replaces current people, places, and relationships with backup data.
+The confirmation phrase is required to prevent accidental full-database replacement.

@@ -7,8 +7,10 @@ describe("GET /api/health", () => {
   it("returns scaffold health status without exposing a local database path", async () => {
     const app = createApp(
       {
+        APP_ADMIN_PASSWORD: undefined,
         APP_ENV: "test",
         APP_PORT: 3001,
+        CORS_ORIGIN: "http://localhost:5173",
         DATABASE_URL: "file:./data/family_registry.sqlite",
         DEFAULT_LOCALE: "en",
         SESSION_SECRET: undefined,

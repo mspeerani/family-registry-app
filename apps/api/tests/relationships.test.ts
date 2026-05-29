@@ -6,8 +6,10 @@ import { createApp } from "../src/app.js";
 import { runMigrations } from "../src/db/database.js";
 
 const config = {
+  APP_ADMIN_PASSWORD: undefined,
   APP_ENV: "test" as const,
   APP_PORT: 3001,
+  CORS_ORIGIN: "http://localhost:5173",
   DATABASE_URL: "file::memory:",
   DEFAULT_LOCALE: "en" as const,
   SESSION_SECRET: undefined,
@@ -88,4 +90,3 @@ describe("relationship API", () => {
     await request(app).post("/api/relationships").send(relationship).expect(409);
   });
 });
-

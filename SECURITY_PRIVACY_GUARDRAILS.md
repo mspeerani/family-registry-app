@@ -64,6 +64,15 @@ If any private or questionable file appears, unstage it before committing.
 
 Use `.env.example` for documented configuration names. Use `.env` locally for real values. Never commit `.env`.
 
+Production deployments must set:
+
+```text
+APP_ADMIN_PASSWORD
+SESSION_SECRET
+```
+
+`SESSION_SECRET` must be at least 32 characters. Do not reuse passwords or secrets from any other account.
+
 ## Photo Rule
 
 Do not commit photos. UI fixtures may use generated placeholders or simple local SVG/PNG assets only if they contain no real people and no private family information.

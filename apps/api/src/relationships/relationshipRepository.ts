@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 
 import { getPerson, type Person } from "../people/personRepository.js";
 import type { CreateRelationshipInput } from "./relationshipSchemas.js";
@@ -45,6 +45,7 @@ export type FamilyGraph = {
   edges: FamilyGraphEdge[];
   nodes: FamilyGraphNode[];
   rootId: string;
+  truncated: boolean;
 };
 
 type RelationshipRow = {
@@ -120,13 +121,23 @@ function personExists(database: DatabaseSync, id: string): boolean {
   return Boolean(row);
 }
 
-export function listRelationships(database: DatabaseSync, personId?: string): Relationship[] {
+export function listRelationships(
+  database: DatabaseSync,
+  personId?: string,
+  limit?: number
+): Relationship[] {
   const where = personId
     ? "WHERE relationships.person_id = ? OR relationships.related_person_id = ?"
     : "";
-  const params = personId ? [personId, personId] : [];
+  const params: SQLInputValue[] = personId ? [personId, personId] : [];
+  const limitClause = limit ? "LIMIT ?" : "";
+
+  if (limit) {
+    params.push(limit);
+  }
+
   const rows = database
-    .prepare(`${relationshipSelect} ${where} ORDER BY relationships.created_at DESC`)
+    .prepare(`${relationshipSelect} ${where} ORDER BY relationships.created_at DESC ${limitClause}`)
     .all(...params) as RelationshipRow[];
 
   return rows.map(toRelationship);
@@ -314,9 +325,12 @@ export function getFamilyGraph(
   }
 
   const depthLimit = Math.max(0, Math.min(maxDepth, 4));
+  const nodeLimit = 250;
+  const relationshipLimitPerNode = 500;
   const nodeDepths = new Map<string, number>([[personId, 0]]);
   const edges = new Map<string, FamilyGraphEdge>();
   const queue: Array<{ depth: number; id: string }> = [{ depth: 0, id: personId }];
+  let truncated = false;
 
   while (queue.length > 0) {
     const current = queue.shift();
@@ -325,28 +339,45 @@ export function getFamilyGraph(
       continue;
     }
 
-    const relationships = listRelationships(database, current.id);
+    if (nodeDepths.size >= nodeLimit) {
+      truncated = true;
+      break;
+    }
+
+    const relationships = listRelationships(database, current.id, relationshipLimitPerNode);
+
+    if (relationships.length >= relationshipLimitPerNode) {
+      truncated = true;
+    }
 
     for (const relationship of relationships) {
       const neighborId =
         relationship.personId === current.id ? relationship.relatedPersonId : relationship.personId;
+
+      if (!nodeDepths.has(neighborId) && nodeDepths.size >= nodeLimit) {
+        truncated = true;
+        continue;
+      }
+
       const neighbor = getPerson(database, neighborId);
 
       if (!neighbor) {
         continue;
       }
 
-      edges.set(relationship.id, {
-        id: relationship.id,
-        relationshipType: relationship.relationshipType,
-        source: relationship.personId,
-        target: relationship.relatedPersonId
-      });
-
       if (!nodeDepths.has(neighborId)) {
         const nextDepth = current.depth + 1;
         nodeDepths.set(neighborId, nextDepth);
         queue.push({ depth: nextDepth, id: neighborId });
+      }
+
+      if (nodeDepths.has(relationship.personId) && nodeDepths.has(relationship.relatedPersonId)) {
+        edges.set(relationship.id, {
+          id: relationship.id,
+          relationshipType: relationship.relationshipType,
+          source: relationship.personId,
+          target: relationship.relatedPersonId
+        });
       }
     }
   }
@@ -368,6 +399,7 @@ export function getFamilyGraph(
   return {
     edges: Array.from(edges.values()),
     nodes: nodes.sort((a, b) => a.depth - b.depth || a.fullName.localeCompare(b.fullName)),
-    rootId: personId
+    rootId: personId,
+    truncated
   };
 }

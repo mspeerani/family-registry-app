@@ -63,6 +63,19 @@ API: http://localhost:3001/api/health
 Web: http://localhost:5173
 ```
 
+## Authentication Configuration
+
+Development can run without login by leaving `APP_ADMIN_PASSWORD` blank.
+Production must set both:
+
+```text
+APP_ADMIN_PASSWORD=<private-admin-password>
+SESSION_SECRET=<random-string-at-least-32-characters>
+```
+
+If `APP_ADMIN_PASSWORD` is set in any environment, `SESSION_SECRET` must also
+be at least 32 characters. The browser session is stored in an HTTP-only cookie.
+
 ## Checks
 
 ```powershell
@@ -75,6 +88,18 @@ The check command runs:
 - Tests
 - Production builds
 - Project privacy/safety audit
+
+Run local smoke checks while API and web are running:
+
+```powershell
+npm run smoke:local
+```
+
+Run the fake in-memory API stress harness:
+
+```powershell
+npm run stress:api
+```
 
 ## Docker Compose
 

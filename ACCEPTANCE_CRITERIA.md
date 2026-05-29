@@ -1,5 +1,9 @@
 # Acceptance Criteria
 
+## v1.0.0 Status
+
+`v1.0.0` is a production-ready MVP, not the final full product vision. Passed release evidence is documented in `docs/RELEASE_NOTES_v1.0.0.md`. Items involving photo upload UI, relationship CSV import, Hijri conversion, graph pan/zoom, advanced graph filtering, and Docker runtime verification remain documented limitations or future enhancements.
+
 ## 1. General
 
 - App can be deployed using documented steps.
@@ -103,4 +107,3 @@
 - Uploads are restricted to image files.
 - Errors are logged.
 - Production mode does not expose stack traces to users.
-

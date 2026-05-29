@@ -6,8 +6,10 @@ import { createApp } from "../src/app.js";
 import { runMigrations } from "../src/db/database.js";
 
 const config = {
+  APP_ADMIN_PASSWORD: undefined,
   APP_ENV: "test" as const,
   APP_PORT: 3001,
+  CORS_ORIGIN: "http://localhost:5173",
   DATABASE_URL: "file::memory:",
   DEFAULT_LOCALE: "en" as const,
   SESSION_SECRET: undefined,
@@ -57,4 +59,3 @@ describe("family graph API", () => {
     expect(depthTwo.body.graph.edges).toHaveLength(2);
   });
 });
-

@@ -8,6 +8,7 @@ services:
     environment:
       APP_ENV: development
       APP_PORT: 3001
+      CORS_ORIGIN: http://localhost:5173
       DATABASE_URL: file:/data/family_registry.sqlite
       UPLOAD_DIR: /data/uploads
     ports:
@@ -31,4 +32,3 @@ services:
 
 volumes:
   family_registry_data:
-

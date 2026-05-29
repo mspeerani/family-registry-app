@@ -12,8 +12,8 @@ v0.5.0 - relationships and derived family links
 v0.6.0 - search and reminders
 v0.7.0 - multilingual UI
 v0.8.0 - family tree and knowledge graph
-v0.9.0 - import/export/backup and production hardening
-v1.0.0 - production-ready release
+v0.9.0 - import/export/backup
+v1.0.0 - production hardening and release
 ```
 
 Version numbers may be adjusted if the implementation naturally splits differently, but the release notes must explain the change.
@@ -119,9 +119,9 @@ Exit criteria:
 - CSV import preview works.
 - CSV export works.
 - Backup works.
-- Restore works in a clean deployment.
+- Restore works in tests and requires explicit confirmation by `v1.0.0`.
 - Production build works.
-- Docker Compose deployment works.
+- Docker Compose deployment is documented.
 - Security and privacy audit passes.
 - Tag `v0.9.0` created and pushed.
 
@@ -131,8 +131,16 @@ Exit criteria:
 
 - All MVP acceptance criteria pass.
 - Stress tests pass or documented limits are accepted.
-- Backup/restore has been verified.
+- Backup/restore has been verified with automated tests and local smoke checks.
+- Production authentication and restore confirmation are implemented.
 - Public repo contains no private data.
 - Release notes exist.
 - Tag `v1.0.0` created and pushed.
 
+Release evidence:
+
+- `npm run check` passed.
+- `npm run smoke:local` passed.
+- `npm run stress:api` passed with 25,000 fake people and 100,000 fake relationships.
+- `npm audit --audit-level=high` found 0 vulnerabilities.
+- Docker Compose verification is pending on a machine with Docker installed.

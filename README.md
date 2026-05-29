@@ -24,6 +24,7 @@ The documents are intended to be handed directly to a developer without requirin
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - local development and runtime setup.
 - [docs/DATABASE.md](docs/DATABASE.md) - SQLite migration and fake seed data guide.
 - [docs/API.md](docs/API.md) - current backend API endpoints.
+- [docs/RELEASE_NOTES_v1.0.0.md](docs/RELEASE_NOTES_v1.0.0.md) - production release notes.
 
 ## Product Summary
 
@@ -34,9 +35,9 @@ Build a slim, efficient family knowledge app for extended family data. The datab
 - Frontend: React + TypeScript
 - Backend: Node.js + Express + TypeScript
 - Database: SQLite
-- ORM/query layer: Prisma or Drizzle
-- Graph/tree visualization: Cytoscape.js or React Flow
-- Date handling: Luxon plus a Hijri calendar library with manual override support
+- Query layer: SQLite repository modules using Node.js `node:sqlite`
+- Graph/tree visualization: Native React/SVG with server-side graph caps
+- Date handling: Gregorian reminders now; Hijri conversion/manual override remains future work
 - Packaging/deployment: Docker Compose for server deployment, plus local SQLite database file backup
 
 ## Core Principle
@@ -58,6 +59,7 @@ v0.6.0 - search filters and reminders
 v0.7.0 - multilingual UI hardening
 v0.8.0 - family tree and knowledge graph views
 v0.9.0 - import/export/backup and hardening notes
+v1.0.0 - production-ready release
 ```
 
 Before every release, run:
@@ -108,7 +110,20 @@ $nodeDir = Get-ChildItem .\.tools -Directory -Filter "node-*-win-x64" | Select-O
 $env:Path = "$nodeDir;$env:Path"
 & "$nodeDir\npm.cmd" install
 & "$nodeDir\npm.cmd" run check
+& "$nodeDir\npm.cmd" run smoke:local
+& "$nodeDir\npm.cmd" run stress:api
 ```
+
+## Production Secrets
+
+Production requires:
+
+```text
+APP_ADMIN_PASSWORD=<private-admin-password>
+SESSION_SECRET=<random-string-at-least-32-characters>
+```
+
+Never commit `.env` or real family data. The repository is public.
 
 Run database migrations:
 

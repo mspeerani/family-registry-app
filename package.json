@@ -1,6 +1,6 @@
 {
   "name": "family-registry-app",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -16,6 +16,8 @@
     "dev": "concurrently -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "npm --workspace apps/api run dev",
     "dev:web": "npm --workspace apps/web run dev",
+    "smoke:local": "powershell -ExecutionPolicy Bypass -File .\\scripts\\release_smoke.ps1",
+    "stress:api": "npm --workspace apps/api run stress",
     "test": "npm run test --workspaces",
     "typecheck": "npm run typecheck --workspaces"
   },

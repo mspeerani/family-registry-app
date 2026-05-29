@@ -1,14 +1,12 @@
-# Release Notes Draft
+# Release Notes - v1.0.0
 
-## Current Candidate
-
-Current milestone:
+## Release
 
 ```text
-v0.9.0 - import/export/backup and hardening notes
+v1.0.0 - production-ready release
 ```
 
-## Included So Far
+## Included
 
 - Project governance and quality gates.
 - Public repository privacy guardrails.
@@ -24,27 +22,35 @@ v0.9.0 - import/export/backup and hardening notes
 - Relationships CSV export.
 - People CSV import preview and commit.
 - JSON backup export and restore.
+- Production login protection using an HTTP-only session cookie.
+- Production config validation for `APP_ADMIN_PASSWORD` and `SESSION_SECRET`.
+- Explicit restore confirmation phrase for destructive backup restore.
+- Local release smoke-test script.
+- API stress-test harness using fake in-memory data.
+- Graph traversal caps to keep large high-degree family graphs responsive.
 
-## Production Exceptions Before v1.0.0
+## Verification
 
-- Docker Compose is documented but not verified on this laptop because Docker is not installed.
-- Authentication is not implemented yet.
-- Restore endpoint is destructive and should be protected before real deployment.
-- Relationship CSV import is not implemented yet.
-- Real family data must not be entered until deployment privacy controls are reviewed.
+Passed on 2026-05-29:
 
-## Verification Command
+- `npm run check`
+- `npm run smoke:local`
+- `npm run stress:api`
+- `npm audit --audit-level=high`
 
-```powershell
-npm run check
+Stress evidence:
+
+```text
+Seeded 25000 fake people and 100000 fake relationships.
+Search common query: 27.1 ms
+Reminder window: 154.7 ms
+Graph depth 3: 82.4 ms
 ```
 
-Current gate includes:
+## Known Limitations
 
-- API typecheck
-- Web typecheck
-- API tests
-- Web tests
-- Production builds
-- Strict project privacy audit
-
+- Docker Compose is documented but not verified on this laptop because Docker is not installed.
+- Relationship CSV import is not included; relationship export is available.
+- Hijri date conversion and Hijri reminder logic remain future work.
+- Photo upload/storage is modeled but not implemented in the UI.
+- Real family data should only be entered in a private deployment with `.env` secrets configured.

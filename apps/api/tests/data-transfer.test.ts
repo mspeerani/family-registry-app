@@ -6,8 +6,10 @@ import { createApp } from "../src/app.js";
 import { runMigrations } from "../src/db/database.js";
 
 const config = {
+  APP_ADMIN_PASSWORD: undefined,
   APP_ENV: "test" as const,
   APP_PORT: 3001,
+  CORS_ORIGIN: "http://localhost:5173",
   DATABASE_URL: "file::memory:",
   DEFAULT_LOCALE: "en" as const,
   SESSION_SECRET: undefined,
@@ -54,11 +56,20 @@ describe("data transfer API", () => {
     const backup = await request(app).get("/api/export/backup").expect(200);
     expect(backup.body.tables.people).toHaveLength(1);
 
-    await request(app).post("/api/restore/backup").send(backup.body).expect(200);
+    await request(app)
+      .post("/api/restore/backup")
+      .set("x-restore-confirmation", "RESTORE_FAMILY_REGISTRY")
+      .send(backup.body)
+      .expect(200);
 
     const people = await request(app).get("/api/people").expect(200);
     expect(people.body.people).toHaveLength(1);
     expect(people.body.people[0].fullName).toBe("Imported Person");
   });
-});
 
+  it("requires explicit confirmation before restoring backups", async () => {
+    const backup = await request(app).get("/api/export/backup").expect(200);
+
+    await request(app).post("/api/restore/backup").send(backup.body).expect(400);
+  });
+});

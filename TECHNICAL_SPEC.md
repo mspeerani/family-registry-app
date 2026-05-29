@@ -9,10 +9,10 @@ Recommended stack:
 - Frontend: React + TypeScript + Vite
 - Backend: Node.js + Express + TypeScript
 - Database: SQLite
-- ORM: Prisma or Drizzle
-- Graph visualization: Cytoscape.js or React Flow
-- Styling: CSS modules, Tailwind, or a minimal component system
-- Testing: Vitest, React Testing Library, Playwright, backend API tests
+- Query layer: repository modules using Node.js `node:sqlite`
+- Graph visualization: native React/SVG with server-side traversal caps
+- Styling: minimal CSS
+- Testing: Vitest, backend API tests, project audit, local smoke script, API stress script
 - Packaging: Docker Compose
 
 Alternative acceptable stack:
@@ -67,11 +67,15 @@ Required environment variables:
 ```env
 APP_ENV=production
 APP_PORT=3000
+CORS_ORIGIN=https://your-family-registry-domain.example
 DATABASE_URL=file:/data/family_registry.sqlite
 UPLOAD_DIR=/data/uploads
-SESSION_SECRET=change-this-secret
+APP_ADMIN_PASSWORD=change-this-password
+SESSION_SECRET=change-this-secret-at-least-32-characters
 DEFAULT_LOCALE=en
 ```
+
+Production startup must fail if `APP_ADMIN_PASSWORD` or a strong `SESSION_SECRET` is missing.
 
 ## 4. API Endpoints
 
@@ -91,6 +95,18 @@ GET /api/people/:id/descendants
 GET /api/people/:id/tree
 GET /api/people/:id/graph?depth=2
 ```
+
+Large graph responses are capped and include a `truncated` flag when the server limits traversal.
+
+### Auth
+
+```http
+GET /api/auth/status
+POST /api/auth/login
+POST /api/auth/logout
+```
+
+All data routes require login when `APP_ADMIN_PASSWORD` is configured.
 
 ### Relationships
 
@@ -133,6 +149,8 @@ GET /api/export/relationships.csv
 GET /api/export/backup
 POST /api/restore/backup
 ```
+
+Restore requires the confirmation phrase `RESTORE_FAMILY_REGISTRY`.
 
 ### Settings
 
@@ -202,8 +220,9 @@ Minimum:
 - Store uploads outside source directory.
 - Restrict upload file types to images.
 - Enforce max upload size.
-- Add authentication if deployed beyond a private local machine.
+- Require authentication in production.
 - Use secure session secret in production.
+- Require explicit confirmation before destructive restore.
 
 ## 9. Accessibility
 
@@ -228,7 +247,8 @@ Minimum tests:
 - Import validation tests.
 - UI language switch tests.
 - Urdu RTL layout smoke test.
-- Playwright test for core add-person workflow.
+- Local smoke script for API, web, import preview, exports, and restore guard.
+- API stress script for search, reminder, and graph performance.
 
 ## 11. Logging and Errors
 
@@ -238,4 +258,3 @@ The app must:
 - Log backend errors with timestamp and request ID.
 - Show user-friendly frontend errors.
 - Avoid exposing stack traces in production.
-

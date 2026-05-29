@@ -3,6 +3,8 @@ import {
   Database,
   Download,
   GitBranch,
+  Lock,
+  LogOut,
   Network,
   Plus,
   Search,
@@ -17,10 +19,13 @@ import {
   commitPeopleImport,
   createRelationship,
   createPerson,
+  fetchAuthStatus,
   fetchFamilyGraph,
   fetchFamilyProfile,
   fetchPeople,
   fetchReminderWindow,
+  login,
+  logout,
   previewPeopleImport,
   updatePerson,
   type FamilyGraph,
@@ -46,6 +51,11 @@ export default function App() {
   const [locale, setLocale] = useState<Locale>(() =>
     getStoredLocale(typeof window === "undefined" ? undefined : window.localStorage)
   );
+  const [authStatus, setAuthStatus] = useState<{
+    authenticated: boolean;
+    authRequired: boolean;
+  } | null>(null);
+  const [password, setPassword] = useState("");
   const [query, setQuery] = useState("");
   const [missingBirthDate, setMissingBirthDate] = useState(false);
   const [missingFatherName, setMissingFatherName] = useState(false);
@@ -92,14 +102,20 @@ export default function App() {
       grandchildren: t(locale, "grandchildren"),
       graph: t(locale, "graph"),
       graphDepth: t(locale, "graphDepth"),
+      graphLimited: t(locale, "graphLimited"),
       import: t(locale, "import"),
       language: t(locale, "language"),
+      loading: t(locale, "loading"),
+      login: t(locale, "login"),
+      loginRequired: t(locale, "loginRequired"),
+      logout: t(locale, "logout"),
       missingBirthDate: t(locale, "missingBirthDate"),
       missingFatherName: t(locale, "missingFatherName"),
       next5: t(locale, "next5"),
       noRecords: t(locale, "noRecords"),
       parents: t(locale, "parents"),
       past5: t(locale, "past5"),
+      password: t(locale, "password"),
       profile: t(locale, "profile"),
       registry: t(locale, "registry"),
       relatedPerson: t(locale, "relatedPerson"),
@@ -122,10 +138,33 @@ export default function App() {
     [locale]
   );
 
+  const canUseApp = Boolean(authStatus && (!authStatus.authRequired || authStatus.authenticated));
+
   useEffect(() => {
     applyDocumentLocale(locale, document.documentElement);
     persistLocale(locale, window.localStorage);
   }, [locale]);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    fetchAuthStatus()
+      .then((status) => {
+        if (isCurrent) {
+          setAuthStatus(status);
+        }
+      })
+      .catch((caught: unknown) => {
+        if (isCurrent) {
+          setError(caught instanceof Error ? caught.message : "Unable to check login status.");
+          setAuthStatus({ authenticated: false, authRequired: true });
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   async function loadPeopleRecords() {
     if (missingBirthDate || missingFatherName) {
@@ -140,6 +179,10 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!canUseApp) {
+      return;
+    }
+
     let isCurrent = true;
 
     setIsLoading(true);
@@ -172,17 +215,25 @@ export default function App() {
     return () => {
       isCurrent = false;
     };
-  }, [query, selectedId, missingBirthDate, missingFatherName]);
+  }, [query, selectedId, missingBirthDate, missingFatherName, canUseApp]);
 
   useEffect(() => {
+    if (!canUseApp) {
+      return;
+    }
+
     fetchReminderWindow()
       .then(setReminders)
       .catch((caught: unknown) => {
         setError(caught instanceof Error ? caught.message : "Unable to load reminders.");
       });
-  }, []);
+  }, [canUseApp]);
 
   useEffect(() => {
+    if (!canUseApp) {
+      return;
+    }
+
     if (!selectedId) {
       setProfile(null);
       return;
@@ -205,9 +256,13 @@ export default function App() {
     return () => {
       isCurrent = false;
     };
-  }, [selectedId]);
+  }, [selectedId, canUseApp]);
 
   useEffect(() => {
+    if (!canUseApp) {
+      return;
+    }
+
     if (!selectedId || viewMode !== "graph") {
       return;
     }
@@ -229,7 +284,7 @@ export default function App() {
     return () => {
       isCurrent = false;
     };
-  }, [selectedId, graphDepth, viewMode]);
+  }, [selectedId, graphDepth, viewMode, canUseApp]);
 
   const selectedPerson = people.find((person) => person.id === selectedId) ?? null;
   const isReadOnly = mode === "view";
@@ -336,8 +391,39 @@ export default function App() {
     }
   }
 
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+
+    try {
+      const status = await login(password);
+      setAuthStatus(status);
+      setPassword("");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to login.");
+    }
+  }
+
+  async function handleLogout() {
+    setError(null);
+
+    try {
+      const status = await logout();
+      setPeople([]);
+      setSelectedId(null);
+      setForm(emptyPersonForm);
+      setProfile(null);
+      setGraph(null);
+      setAuthStatus(status);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to logout.");
+    }
+  }
+
   async function downloadApiFile(path: string, filename: string) {
-    const response = await fetch(apiUrl(path));
+    const response = await fetch(apiUrl(path), {
+      credentials: "include"
+    });
 
     if (!response.ok) {
       throw new Error(`Download failed with ${response.status}`);
@@ -380,6 +466,67 @@ export default function App() {
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to import file.");
     }
+  }
+
+  if (!authStatus) {
+    return (
+      <div className="auth-shell">
+        <div className="auth-panel">
+          <div className="brand">
+            <Database aria-hidden="true" size={19} />
+            <span>{labels.appName}</span>
+          </div>
+          <p>{labels.loading}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!canUseApp) {
+    return (
+      <div className="auth-shell">
+        <form className="auth-panel" onSubmit={handleLogin}>
+          <div className="brand">
+            <Lock aria-hidden="true" size={19} />
+            <span>{labels.appName}</span>
+          </div>
+          <p>{labels.loginRequired}</p>
+          {error ? (
+            <p className="error-line">
+              {labels.error}: {error}
+            </p>
+          ) : null}
+          <label>
+            <span>{labels.password}</span>
+            <input
+              autoFocus
+              required
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+          <div className="auth-actions">
+            <button className="primary" type="submit">
+              {labels.login}
+            </button>
+            <label className="language-select">
+              <span>{labels.language}</span>
+              <select
+                value={locale}
+                onChange={(event) => setLocale(event.target.value as Locale)}
+              >
+                {Object.entries(localeMeta).map(([key, meta]) => (
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </form>
+      </div>
+    );
   }
 
   return (
@@ -444,6 +591,16 @@ export default function App() {
           >
             {labels.backup}
           </button>
+          {authStatus.authRequired ? (
+            <button
+              type="button"
+              title={labels.logout}
+              aria-label={labels.logout}
+              onClick={() => void handleLogout()}
+            >
+              <LogOut aria-hidden="true" size={16} />
+            </button>
+          ) : null}
           <label className="language-select">
             <span>{labels.language}</span>
             <select
@@ -931,6 +1088,7 @@ function GraphView({
           {labels.exportGraph}
         </button>
       </div>
+      {graph?.truncated ? <p className="notice-line">{labels.graphLimited}</p> : null}
 
       {!graph || graph.nodes.length === 0 ? (
         <p className="empty-state">{labels.noRecords}</p>

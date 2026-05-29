@@ -59,6 +59,7 @@ export type FamilyGraph = {
   edges: FamilyGraphEdge[];
   nodes: FamilyGraphNode[];
   rootId: string;
+  truncated: boolean;
 };
 
 export type RelationshipPayload = {
@@ -100,13 +101,19 @@ export type ImportPreview = {
   validCount: number;
 };
 
+export type AuthStatus = {
+  authenticated: boolean;
+  authRequired: boolean;
+};
+
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
+    ...init,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {})
-    },
-    ...init
+    }
   });
 
   if (!response.ok) {
@@ -115,6 +122,23 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   }
 
   return (await response.json()) as T;
+}
+
+export async function fetchAuthStatus(): Promise<AuthStatus> {
+  return requestJson<AuthStatus>("/api/auth/status");
+}
+
+export async function login(password: string): Promise<AuthStatus> {
+  return requestJson<AuthStatus>("/api/auth/login", {
+    body: JSON.stringify({ password }),
+    method: "POST"
+  });
+}
+
+export async function logout(): Promise<AuthStatus> {
+  return requestJson<AuthStatus>("/api/auth/logout", {
+    method: "POST"
+  });
 }
 
 export async function previewPeopleImport(csv: string): Promise<ImportPreview> {

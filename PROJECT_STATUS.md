@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 8 - Import, Export, Backup, And Hardening
+Phase: 9 - Production Release
 
 Current release target:
 
 ```text
-v0.9.0 - import/export/backup and hardening notes
+v1.0.0 - production-ready release
 ```
 
 Previous release:
 
 ```text
-v0.8.0 - family tree and knowledge graph views
+v0.9.0 - import/export/backup and hardening notes
 ```
 
 ## Scope Boundary
@@ -65,18 +65,18 @@ The project is managed through a builder-reviewer-release loop:
 
 No phase is complete until the relevant checkpoint gate passes.
 
-## Immediate Next Phase
+## Release Status
 
-After `v0.9.0`, the next target is:
+Current `v1.0.0` release evidence:
 
-```text
-v1.0.0 - production-ready release
-```
+- Production authentication added with HTTP-only session cookie.
+- Production config requires admin password and strong session secret.
+- Backup restore requires explicit confirmation phrase.
+- Full automated check passed: typecheck, tests, builds, strict privacy audit.
+- Local release smoke passed against running API and web app.
+- API stress harness passed with 25,000 fake people and 100,000 fake relationships.
+- npm audit found 0 high-or-higher vulnerabilities.
 
-Expected `v1.0.0` contents:
+Documented exception:
 
-- Final acceptance audit
-- Docker verification if Docker is available
-- Backup/restore warning review
-- Release notes
-- Production readiness declaration or documented exceptions
+- Docker Compose could not be verified on this laptop because Docker is not installed.

@@ -159,3 +159,19 @@ Decision: `v0.9.0` supports people CSV import preview and commit. Relationship C
 Reason: Person import is the highest-value first data migration path. Relationship import needs stronger duplicate and direction review before enabling commit.
 
 Date: 2026-05-29
+
+## D-021 - Production Authentication
+
+Decision: `v1.0.0` uses a single-admin password from environment configuration and an HTTP-only signed session cookie.
+
+Reason: The app stores private family data and must not expose API routes when deployed. A single-admin model is sufficient for the first production release and avoids adding account-management complexity before it is needed.
+
+Date: 2026-05-29
+
+## D-022 - Graph Caps For Large Families
+
+Decision: Family graph traversal is capped server-side and returns a `truncated` flag when the response is limited.
+
+Reason: Stress testing showed high-degree graphs can become expensive even with depth limits. Node and relationship caps keep the app responsive while preserving selected-person graph context.
+
+Date: 2026-05-29

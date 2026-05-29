@@ -76,3 +76,8 @@ For `v1.0.0`, create release notes containing:
 - Privacy warnings
 - Upgrade path
 
+`v1.0.0` release notes are stored at:
+
+```text
+docs/RELEASE_NOTES_v1.0.0.md
+```
