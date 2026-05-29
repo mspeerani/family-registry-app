@@ -346,6 +346,143 @@ td {
   padding-top: 10px;
 }
 
+.empty-state {
+  background: #eef3ef;
+  border-radius: 6px;
+  margin: 0;
+  padding: 14px;
+}
+
+.tree-board {
+  display: grid;
+  gap: 14px;
+  min-height: 420px;
+}
+
+.tree-level {
+  display: grid;
+  gap: 8px;
+}
+
+.tree-level > span {
+  color: #46534d;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tree-row {
+  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tree-node {
+  align-items: flex-start;
+  border-color: #c9d4cf;
+  display: grid;
+  gap: 2px;
+  min-height: 58px;
+  min-width: 160px;
+  text-align: start;
+}
+
+.tree-node strong,
+.tree-node span {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-node span {
+  color: #66736d;
+  font-size: 0.78rem;
+}
+
+.selected-tree-node {
+  background: #e7f1ee;
+  border-color: #245c73;
+}
+
+.muted {
+  color: #66736d;
+}
+
+.graph-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.graph-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.graph-toolbar label {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.graph-toolbar span {
+  color: #46534d;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.graph-toolbar select {
+  border: 1px solid #cfd8d3;
+  border-radius: 6px;
+  min-height: 34px;
+  padding: 5px 8px;
+}
+
+.knowledge-graph {
+  background: #f8faf8;
+  border: 1px solid #d7ded9;
+  border-radius: 8px;
+  min-height: 420px;
+  width: 100%;
+}
+
+.knowledge-graph line {
+  stroke: #91a39b;
+  stroke-width: 1.4;
+}
+
+.knowledge-graph text {
+  dominant-baseline: middle;
+  fill: #2c3832;
+  font-size: 11px;
+  pointer-events: none;
+  text-anchor: middle;
+}
+
+.graph-node {
+  cursor: pointer;
+}
+
+.graph-node rect {
+  fill: #ffffff;
+  stroke: #9eaaa5;
+  stroke-width: 1.2;
+}
+
+.graph-node text + text {
+  fill: #66736d;
+  font-size: 10px;
+}
+
+.selected-graph-node rect {
+  fill: #e7f1ee;
+  stroke: #245c73;
+  stroke-width: 2;
+}
+
 .error-line {
   background: #fff2f0;
   border: 1px solid #e0a09a;

@@ -127,3 +127,19 @@ Decision: The web app stores the selected locale in browser local storage.
 Reason: Users should not need to reselect English, Urdu, or Gujarati on every app launch.
 
 Date: 2026-05-29
+
+## D-017 - Native SVG Graph For First Graph Release
+
+Decision: Use native React/SVG/CSS for the initial family tree and knowledge graph instead of introducing a graph library in `v0.8.0`.
+
+Reason: The current graph scope is selected-person context with small depth limits. Native SVG keeps the app slim and avoids dependency weight while leaving room to adopt Cytoscape.js or React Flow later if graph complexity grows.
+
+Date: 2026-05-29
+
+## D-018 - SVG Graph Export
+
+Decision: The first graph export format is SVG.
+
+Reason: SVG is a real image format, preserves text and edges clearly, and can later be converted to PDF if required.
+
+Date: 2026-05-29

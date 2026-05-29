@@ -17,6 +17,7 @@
 | R-013 | Users may misunderstand relationship direction when linking people | Medium | Medium | Document convention and keep UI labels focused on selected person relationship context | Open |
 | R-014 | Reminder date logic could mishandle partial or Hijri-only dates | Medium | Medium | Include only exact Gregorian month/day dates for now; add Hijri-specific tests in later phase | Open |
 | R-015 | Urdu/Gujarati text can become mojibake through encoding drift | High | Medium | Store translated source strings as Unicode escapes and test for mojibake markers | Mitigated |
+| R-016 | Native SVG graph can become crowded for large families | Medium | High | Enforce depth controls now; consider Cytoscape.js or React Flow when advanced graph navigation is needed | Open |
 
 ## Risk Handling Rule
 

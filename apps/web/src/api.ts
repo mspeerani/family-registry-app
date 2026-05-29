@@ -37,6 +37,26 @@ export type FamilyProfile = {
   spouses: Person[];
 };
 
+export type FamilyGraphNode = {
+  depth: number;
+  fatherName: string | null;
+  fullName: string;
+  id: string;
+};
+
+export type FamilyGraphEdge = {
+  id: string;
+  relationshipType: string;
+  source: string;
+  target: string;
+};
+
+export type FamilyGraph = {
+  edges: FamilyGraphEdge[];
+  nodes: FamilyGraphNode[];
+  rootId: string;
+};
+
 export type RelationshipPayload = {
   confidence?: string;
   notes?: string | null;
@@ -128,6 +148,11 @@ export async function archivePerson(id: string): Promise<void> {
 export async function fetchFamilyProfile(id: string): Promise<FamilyProfile> {
   const result = await requestJson<{ profile: FamilyProfile }>(`/api/people/${id}/profile`);
   return result.profile;
+}
+
+export async function fetchFamilyGraph(id: string, depth: number): Promise<FamilyGraph> {
+  const result = await requestJson<{ graph: FamilyGraph }>(`/api/people/${id}/graph?depth=${depth}`);
+  return result.graph;
 }
 
 export async function createRelationship(payload: RelationshipPayload): Promise<void> {

@@ -8,17 +8,20 @@ import {
   Search,
   Upload
 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   advancedSearchPeople,
   archivePerson,
   createRelationship,
   createPerson,
+  fetchFamilyGraph,
   fetchFamilyProfile,
   fetchPeople,
   fetchReminderWindow,
   updatePerson,
+  type FamilyGraph,
+  type FamilyGraphNode,
   type FamilyProfile,
   type Person,
   type ReminderWindow
@@ -34,6 +37,7 @@ import {
 import { emptyPersonForm, formFromPerson, toPersonPayload, type PersonForm } from "./personForm";
 
 type Mode = "view" | "edit" | "new";
+type ViewMode = "registry" | "tree" | "graph";
 
 export default function App() {
   const [locale, setLocale] = useState<Locale>(() =>
@@ -46,8 +50,11 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<PersonForm>(emptyPersonForm);
   const [profile, setProfile] = useState<FamilyProfile | null>(null);
+  const [graph, setGraph] = useState<FamilyGraph | null>(null);
+  const [graphDepth, setGraphDepth] = useState(2);
   const [reminders, setReminders] = useState<ReminderWindow>({ future: [], past: [] });
   const [mode, setMode] = useState<Mode>("new");
+  const [viewMode, setViewMode] = useState<ViewMode>("registry");
   const [relatedPersonId, setRelatedPersonId] = useState("");
   const [relationshipType, setRelationshipType] = useState("father");
   const [error, setError] = useState<string | null>(null);
@@ -73,11 +80,13 @@ export default function App() {
       edit: t(locale, "edit"),
       error: t(locale, "error"),
       export: t(locale, "export"),
+      exportGraph: t(locale, "exportGraph"),
       fatherName: t(locale, "fatherName"),
       filters: t(locale, "filters"),
       fullName: t(locale, "fullName"),
       grandchildren: t(locale, "grandchildren"),
       graph: t(locale, "graph"),
+      graphDepth: t(locale, "graphDepth"),
       import: t(locale, "import"),
       language: t(locale, "language"),
       missingBirthDate: t(locale, "missingBirthDate"),
@@ -193,6 +202,30 @@ export default function App() {
     };
   }, [selectedId]);
 
+  useEffect(() => {
+    if (!selectedId || viewMode !== "graph") {
+      return;
+    }
+
+    let isCurrent = true;
+
+    fetchFamilyGraph(selectedId, graphDepth)
+      .then((nextGraph) => {
+        if (isCurrent) {
+          setGraph(nextGraph);
+        }
+      })
+      .catch((caught: unknown) => {
+        if (isCurrent) {
+          setError(caught instanceof Error ? caught.message : "Unable to load graph.");
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedId, graphDepth, viewMode]);
+
   const selectedPerson = people.find((person) => person.id === selectedId) ?? null;
   const isReadOnly = mode === "view";
 
@@ -210,6 +243,21 @@ export default function App() {
   function selectPerson(person: Person) {
     setSelectedId(person.id);
     setForm(formFromPerson(person));
+    setMode("view");
+  }
+
+  async function selectPersonById(personId: string) {
+    const existing = people.find((person) => person.id === personId);
+
+    if (existing) {
+      selectPerson(existing);
+      return;
+    }
+
+    const nextProfile = await fetchFamilyProfile(personId);
+    setSelectedId(personId);
+    setForm(formFromPerson(nextProfile.person));
+    setProfile(nextProfile);
     setMode("view");
   }
 
@@ -292,12 +340,14 @@ export default function App() {
         </div>
 
         <nav className="nav" aria-label="Primary">
-          <button type="button">{labels.registry}</button>
-          <button type="button">
+          <button type="button" onClick={() => setViewMode("registry")}>
+            {labels.registry}
+          </button>
+          <button type="button" onClick={() => setViewMode("tree")}>
             <GitBranch aria-hidden="true" size={16} />
             {labels.tree}
           </button>
-          <button type="button">
+          <button type="button" onClick={() => setViewMode("graph")}>
             <Network aria-hidden="true" size={16} />
             {labels.graph}
           </button>
@@ -366,10 +416,10 @@ export default function App() {
           </label>
         </aside>
 
-        <section className="registry" aria-label={labels.registry}>
+        <section className="registry" aria-label={labels[viewMode]}>
           <div className="section-heading">
-            <h1>{labels.registry}</h1>
-            <span>{people.length}</span>
+            <h1>{labels[viewMode]}</h1>
+            {viewMode === "registry" ? <span>{people.length}</span> : null}
           </div>
 
           {error ? (
@@ -378,45 +428,35 @@ export default function App() {
             </p>
           ) : null}
 
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>{labels.fullName}</th>
-                  <th>{labels.fatherName}</th>
-                  <th>{labels.surname}</th>
-                  <th>{labels.birthDate}</th>
-                  <th>{labels.birthPlace}</th>
-                  <th>{labels.deathDate}</th>
-                  <th>{labels.deathPlace}</th>
-                  <th>{labels.confidence}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {people.map((person) => (
-                  <tr
-                    key={person.id}
-                    className={person.id === selectedId ? "selected-row" : undefined}
-                    onClick={() => selectPerson(person)}
-                  >
-                    <td>{person.fullName}</td>
-                    <td>{person.fatherName || "-"}</td>
-                    <td>{person.surname || "-"}</td>
-                    <td>{person.birthDateGregorian || "-"}</td>
-                    <td>{person.birthPlace || "-"}</td>
-                    <td>{person.deathDateGregorian || "-"}</td>
-                    <td>{person.deathPlace || "-"}</td>
-                    <td>{person.dataConfidence}</td>
-                  </tr>
-                ))}
-                {!isLoading && people.length === 0 ? (
-                  <tr>
-                    <td colSpan={8}>{labels.noRecords}</td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
+          {viewMode === "registry" ? (
+            <RegistryTable
+              labels={labels}
+              people={people}
+              selectedId={selectedId}
+              isLoading={isLoading}
+              onSelect={selectPerson}
+            />
+          ) : null}
+
+          {viewMode === "tree" ? (
+            <TreeView
+              labels={labels}
+              profile={profile}
+              selectedPerson={selectedPerson}
+              onSelect={selectPersonById}
+            />
+          ) : null}
+
+          {viewMode === "graph" ? (
+            <GraphView
+              depth={graphDepth}
+              graph={graph}
+              labels={labels}
+              selectedId={selectedId}
+              onDepthChange={setGraphDepth}
+              onSelect={selectPersonById}
+            />
+          ) : null}
         </section>
 
         <aside className="family-panel" aria-label={labels.profile}>
@@ -626,4 +666,283 @@ function FamilyList({ label, people }: { label: string; people: Person[] }) {
       )}
     </div>
   );
+}
+
+function RegistryTable({
+  isLoading,
+  labels,
+  onSelect,
+  people,
+  selectedId
+}: {
+  isLoading: boolean;
+  labels: Record<string, string>;
+  onSelect: (person: Person) => void;
+  people: Person[];
+  selectedId: string | null;
+}) {
+  return (
+    <div className="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{labels.fullName}</th>
+            <th>{labels.fatherName}</th>
+            <th>{labels.surname}</th>
+            <th>{labels.birthDate}</th>
+            <th>{labels.birthPlace}</th>
+            <th>{labels.deathDate}</th>
+            <th>{labels.deathPlace}</th>
+            <th>{labels.confidence}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {people.map((person) => (
+            <tr
+              key={person.id}
+              className={person.id === selectedId ? "selected-row" : undefined}
+              onClick={() => onSelect(person)}
+            >
+              <td>{person.fullName}</td>
+              <td>{person.fatherName || "-"}</td>
+              <td>{person.surname || "-"}</td>
+              <td>{person.birthDateGregorian || "-"}</td>
+              <td>{person.birthPlace || "-"}</td>
+              <td>{person.deathDateGregorian || "-"}</td>
+              <td>{person.deathPlace || "-"}</td>
+              <td>{person.dataConfidence}</td>
+            </tr>
+          ))}
+          {!isLoading && people.length === 0 ? (
+            <tr>
+              <td colSpan={8}>{labels.noRecords}</td>
+            </tr>
+          ) : null}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function TreeView({
+  labels,
+  onSelect,
+  profile,
+  selectedPerson
+}: {
+  labels: Record<string, string>;
+  onSelect: (personId: string) => void;
+  profile: FamilyProfile | null;
+  selectedPerson: Person | null;
+}) {
+  if (!selectedPerson) {
+    return <p className="empty-state">{labels.noRecords}</p>;
+  }
+
+  return (
+    <div className="tree-board">
+      <TreeLevel label={labels.parents} people={profile?.parents ?? []} onSelect={onSelect} />
+      <div className="tree-level">
+        <span>{labels.profile}</span>
+        <div className="tree-row">
+          <TreeNode person={selectedPerson} isSelected onSelect={onSelect} />
+          {(profile?.spouses ?? []).map((person) => (
+            <TreeNode key={person.id} person={person} onSelect={onSelect} />
+          ))}
+        </div>
+      </div>
+      <TreeLevel label={labels.children} people={profile?.children ?? []} onSelect={onSelect} />
+      <TreeLevel
+        label={labels.grandchildren}
+        people={profile?.grandchildren ?? []}
+        onSelect={onSelect}
+      />
+    </div>
+  );
+}
+
+function TreeLevel({
+  label,
+  onSelect,
+  people
+}: {
+  label: string;
+  onSelect: (personId: string) => void;
+  people: Person[];
+}) {
+  return (
+    <div className="tree-level">
+      <span>{label}</span>
+      <div className="tree-row">
+        {people.length > 0 ? (
+          people.map((person) => (
+            <TreeNode key={person.id} person={person} onSelect={onSelect} />
+          ))
+        ) : (
+          <div className="tree-node muted">-</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TreeNode({
+  isSelected = false,
+  onSelect,
+  person
+}: {
+  isSelected?: boolean;
+  onSelect: (personId: string) => void;
+  person: Pick<Person, "fatherName" | "fullName" | "id">;
+}) {
+  return (
+    <button
+      className={isSelected ? "tree-node selected-tree-node" : "tree-node"}
+      type="button"
+      onClick={() => void onSelect(person.id)}
+    >
+      <strong>{person.fullName}</strong>
+      <span>{person.fatherName || "-"}</span>
+    </button>
+  );
+}
+
+function GraphView({
+  depth,
+  graph,
+  labels,
+  onDepthChange,
+  onSelect,
+  selectedId
+}: {
+  depth: number;
+  graph: FamilyGraph | null;
+  labels: Record<string, string>;
+  onDepthChange: (depth: number) => void;
+  onSelect: (personId: string) => void;
+  selectedId: string | null;
+}) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const positions = layoutGraph(graph);
+
+  function exportSvg() {
+    if (!svgRef.current) {
+      return;
+    }
+
+    const svg = new XMLSerializer().serializeToString(svgRef.current);
+    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "family-graph.svg";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="graph-panel">
+      <div className="graph-toolbar">
+        <label>
+          <span>{labels.graphDepth}</span>
+          <select value={depth} onChange={(event) => onDepthChange(Number(event.target.value))}>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+          </select>
+        </label>
+        <button type="button" onClick={exportSvg}>
+          {labels.exportGraph}
+        </button>
+      </div>
+
+      {!graph || graph.nodes.length === 0 ? (
+        <p className="empty-state">{labels.noRecords}</p>
+      ) : (
+        <svg
+          ref={svgRef}
+          className="knowledge-graph"
+          role="img"
+          viewBox="0 0 760 430"
+          aria-label={labels.graph}
+        >
+          {graph.edges.map((edge) => {
+            const source = positions.get(edge.source);
+            const target = positions.get(edge.target);
+
+            if (!source || !target) {
+              return null;
+            }
+
+            return (
+              <g key={edge.id}>
+                <line x1={source.x} y1={source.y} x2={target.x} y2={target.y} />
+                <text x={(source.x + target.x) / 2} y={(source.y + target.y) / 2 - 4}>
+                  {edge.relationshipType}
+                </text>
+              </g>
+            );
+          })}
+
+          {graph.nodes.map((node) => {
+            const point = positions.get(node.id);
+
+            if (!point) {
+              return null;
+            }
+
+            return (
+              <g
+                key={node.id}
+                className={node.id === selectedId ? "graph-node selected-graph-node" : "graph-node"}
+                role="button"
+                tabIndex={0}
+                transform={`translate(${point.x}, ${point.y})`}
+                onClick={() => void onSelect(node.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    void onSelect(node.id);
+                  }
+                }}
+              >
+                <rect x="-72" y="-24" width="144" height="48" rx="7" />
+                <text y="-4">{truncateNodeText(node.fullName)}</text>
+                <text y="13">{truncateNodeText(node.fatherName ?? "-")}</text>
+              </g>
+            );
+          })}
+        </svg>
+      )}
+    </div>
+  );
+}
+
+function layoutGraph(graph: FamilyGraph | null): Map<string, { x: number; y: number }> {
+  const positions = new Map<string, { x: number; y: number }>();
+
+  if (!graph) {
+    return positions;
+  }
+
+  const groups = new Map<number, FamilyGraphNode[]>();
+  for (const node of graph.nodes) {
+    groups.set(node.depth, [...(groups.get(node.depth) ?? []), node]);
+  }
+
+  for (const [depth, nodes] of groups) {
+    const x = 110 + depth * 215;
+    const spacing = nodes.length > 1 ? 300 / (nodes.length - 1) : 0;
+    nodes.forEach((node, index) => {
+      positions.set(node.id, {
+        x,
+        y: nodes.length > 1 ? 70 + index * spacing : 215
+      });
+    });
+  }
+
+  return positions;
+}
+
+function truncateNodeText(value: string): string {
+  return value.length > 20 ? `${value.slice(0, 19)}...` : value;
 }

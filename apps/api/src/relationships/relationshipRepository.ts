@@ -27,6 +27,26 @@ export type FamilyProfile = {
   spouses: Person[];
 };
 
+export type FamilyGraphNode = {
+  depth: number;
+  fatherName: string | null;
+  fullName: string;
+  id: string;
+};
+
+export type FamilyGraphEdge = {
+  id: string;
+  relationshipType: string;
+  source: string;
+  target: string;
+};
+
+export type FamilyGraph = {
+  edges: FamilyGraphEdge[];
+  nodes: FamilyGraphNode[];
+  rootId: string;
+};
+
 type RelationshipRow = {
   confidence: string;
   created_at: string;
@@ -279,5 +299,75 @@ export function getFamilyProfile(database: DatabaseSync, personId: string): Fami
       database,
       Array.from(new Set(spouseRows.map((row) => row.id)))
     )
+  };
+}
+
+export function getFamilyGraph(
+  database: DatabaseSync,
+  personId: string,
+  maxDepth: number
+): FamilyGraph | null {
+  const root = getPerson(database, personId);
+
+  if (!root) {
+    return null;
+  }
+
+  const depthLimit = Math.max(0, Math.min(maxDepth, 4));
+  const nodeDepths = new Map<string, number>([[personId, 0]]);
+  const edges = new Map<string, FamilyGraphEdge>();
+  const queue: Array<{ depth: number; id: string }> = [{ depth: 0, id: personId }];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (!current || current.depth >= depthLimit) {
+      continue;
+    }
+
+    const relationships = listRelationships(database, current.id);
+
+    for (const relationship of relationships) {
+      const neighborId =
+        relationship.personId === current.id ? relationship.relatedPersonId : relationship.personId;
+      const neighbor = getPerson(database, neighborId);
+
+      if (!neighbor) {
+        continue;
+      }
+
+      edges.set(relationship.id, {
+        id: relationship.id,
+        relationshipType: relationship.relationshipType,
+        source: relationship.personId,
+        target: relationship.relatedPersonId
+      });
+
+      if (!nodeDepths.has(neighborId)) {
+        const nextDepth = current.depth + 1;
+        nodeDepths.set(neighborId, nextDepth);
+        queue.push({ depth: nextDepth, id: neighborId });
+      }
+    }
+  }
+
+  const nodes: FamilyGraphNode[] = [];
+
+  for (const [id, depth] of nodeDepths) {
+    const person = getPerson(database, id);
+    if (person) {
+      nodes.push({
+        depth,
+        fatherName: person.fatherName,
+        fullName: person.fullName,
+        id: person.id
+      });
+    }
+  }
+
+  return {
+    edges: Array.from(edges.values()),
+    nodes: nodes.sort((a, b) => a.depth - b.depth || a.fullName.localeCompare(b.fullName)),
+    rootId: personId
   };
 }

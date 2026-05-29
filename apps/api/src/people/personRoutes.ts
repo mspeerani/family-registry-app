@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 
 import { archivePerson, createPerson, getPerson, listPeople, updatePerson } from "./personRepository.js";
 import { createPersonSchema, updatePersonSchema } from "./personSchemas.js";
-import { getFamilyProfile } from "../relationships/relationshipRepository.js";
+import { getFamilyGraph, getFamilyProfile } from "../relationships/relationshipRepository.js";
 
 export function createPeopleRouter(database: DatabaseSync): Router {
   const router = Router();
@@ -31,6 +31,24 @@ export function createPeopleRouter(database: DatabaseSync): Router {
       }
 
       response.json({ profile });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get("/:id/graph", (request, response, next) => {
+    try {
+      const parsedDepth =
+        typeof request.query.depth === "string" ? Number.parseInt(request.query.depth, 10) : 2;
+      const depth = Number.isFinite(parsedDepth) ? parsedDepth : 2;
+      const graph = getFamilyGraph(database, request.params.id, depth);
+
+      if (!graph) {
+        response.status(404).json({ error: { code: "not_found", message: "Person not found." } });
+        return;
+      }
+
+      response.json({ graph });
     } catch (error) {
       next(error);
     }

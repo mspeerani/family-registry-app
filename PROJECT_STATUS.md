@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 6 - Multilingual UI Hardening
+Phase: 7 - Family Tree And Knowledge Graph
 
 Current release target:
 
 ```text
-v0.7.0 - multilingual UI hardening
+v0.8.0 - family tree and knowledge graph views
 ```
 
 Previous release:
 
 ```text
-v0.6.0 - search filters and reminders
+v0.7.0 - multilingual UI hardening
 ```
 
 ## Scope Boundary
@@ -67,16 +67,16 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.7.0`, the next target is:
+After `v0.8.0`, the next target is:
 
 ```text
-v0.8.0 - family tree and knowledge graph
+v0.9.0 - import/export/backup and production hardening
 ```
 
-Expected `v0.8.0` contents:
+Expected `v0.9.0` contents:
 
-- Family tree view for selected person
-- Knowledge graph view for selected person
-- Depth controls
-- Node click/profile behavior
-- Export placeholder or implementation decision
+- CSV export
+- CSV import preview
+- Backup and restore
+- Production hardening pass
+- Release notes draft

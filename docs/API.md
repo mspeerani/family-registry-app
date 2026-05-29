@@ -182,6 +182,42 @@ Returns:
 }
 ```
 
+### Person Family Graph
+
+```http
+GET /api/people/:id/graph?depth=2
+```
+
+Returns selected-person graph nodes and relationship edges.
+
+Depth is capped server-side.
+
+Response:
+
+```json
+{
+  "graph": {
+    "rootId": "person-id",
+    "nodes": [
+      {
+        "id": "person-id",
+        "fullName": "Sample Person",
+        "fatherName": "Sample Father",
+        "depth": 0
+      }
+    ],
+    "edges": [
+      {
+        "id": "relationship-id",
+        "source": "child-id",
+        "target": "father-id",
+        "relationshipType": "father"
+      }
+    ]
+  }
+}
+```
+
 ## Relationship Validation
 
 - Self-relationships return `400 self_relationship`.
