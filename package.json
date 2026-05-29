@@ -1,6 +1,6 @@
 {
   "name": "family-registry-app",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -11,6 +11,8 @@
     "audit:project": "powershell -ExecutionPolicy Bypass -File .\\scripts\\project_audit.ps1 -Strict",
     "build": "npm run build --workspaces",
     "check": "npm run typecheck --workspaces && npm run test --workspaces && npm run build --workspaces && npm run audit:project",
+    "db:migrate": "npm --workspace apps/api run db:migrate",
+    "db:seed": "npm --workspace apps/api run db:seed",
     "dev": "concurrently -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "npm --workspace apps/api run dev",
     "dev:web": "npm --workspace apps/web run dev",
@@ -24,4 +26,3 @@
     "node": ">=22.0.0"
   }
 }
-

@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 1 - Runnable App Scaffold
+Phase: 2 - Database Foundation And Migrations
 
 Current release target:
 
 ```text
-v0.2.0 - runnable application scaffold
+v0.3.0 - database foundation and migrations
 ```
 
 Previous release:
 
 ```text
-v0.1.1 - governance and quality assurance system
+v0.2.0 - runnable application scaffold
 ```
 
 ## Scope Boundary
@@ -67,17 +67,16 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.2.0`, the next target is:
+After `v0.3.0`, the next target is:
 
 ```text
-v0.3.0 - database foundation and migrations
+v0.4.0 - person registry
 ```
 
-Expected `v0.3.0` contents:
+Expected `v0.4.0` contents:
 
-- SQLite connection
-- Migration system
-- Core database tables
-- Fake seed data
-- Migration tests
-- Database safety checks
+- Person create/read/update/archive APIs
+- Person registry UI wired to API
+- Person profile view backed by SQLite
+- Missing optional data support
+- API and UI tests for person workflows

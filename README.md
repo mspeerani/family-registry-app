@@ -21,6 +21,8 @@ The documents are intended to be handed directly to a developer without requirin
 - [EVAL_PLAN.md](EVAL_PLAN.md) - stress, quality, privacy, and regression evaluation plan.
 - [RELEASE_PLAN.md](RELEASE_PLAN.md) - versioning, release, tag, and rollback rules.
 - [SECURITY_PRIVACY_GUARDRAILS.md](SECURITY_PRIVACY_GUARDRAILS.md) - public repository safety rules.
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - local development and runtime setup.
+- [docs/DATABASE.md](docs/DATABASE.md) - SQLite migration and fake seed data guide.
 
 ## Product Summary
 
@@ -47,6 +49,8 @@ Current baseline:
 ```text
 v0.1.0 - initial project documentation pack
 v0.1.1 - governance and quality assurance system
+v0.2.0 - runnable application scaffold
+v0.3.0 - database foundation and migrations
 ```
 
 Before every release, run:
@@ -97,4 +101,16 @@ $nodeDir = Get-ChildItem .\.tools -Directory -Filter "node-*-win-x64" | Select-O
 $env:Path = "$nodeDir;$env:Path"
 & "$nodeDir\npm.cmd" install
 & "$nodeDir\npm.cmd" run check
+```
+
+Run database migrations:
+
+```powershell
+npm run db:migrate
+```
+
+Seed fake development data:
+
+```powershell
+npm run db:seed
 ```

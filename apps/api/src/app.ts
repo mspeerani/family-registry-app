@@ -3,8 +3,12 @@ import express, { type Express } from "express";
 import helmet from "helmet";
 
 import { type AppConfig, getConfig, redactDatabaseUrl } from "./config.js";
+import type { DatabaseHealth } from "./db/database.js";
 
-export function createApp(config: AppConfig = getConfig()): Express {
+export function createApp(
+  config: AppConfig = getConfig(),
+  databaseHealth?: DatabaseHealth
+): Express {
   const app = express();
 
   app.use(helmet());
@@ -14,10 +18,15 @@ export function createApp(config: AppConfig = getConfig()): Express {
   app.get("/api/health", (_request, response) => {
     response.json({
       app: "family-registry-api",
-      database: {
-        configured: Boolean(config.DATABASE_URL),
-        url: redactDatabaseUrl(config.DATABASE_URL)
-      },
+      database:
+        databaseHealth ??
+        {
+          configured: Boolean(config.DATABASE_URL),
+          migrationsApplied: 0,
+          migrationsPending: 0,
+          path: redactDatabaseUrl(config.DATABASE_URL),
+          url: redactDatabaseUrl(config.DATABASE_URL)
+        },
       environment: config.APP_ENV,
       locale: config.DEFAULT_LOCALE,
       status: "ok",
@@ -36,4 +45,3 @@ export function createApp(config: AppConfig = getConfig()): Express {
 
   return app;
 }
-

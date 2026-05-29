@@ -11,7 +11,8 @@
 | R-007 | Backup/restore is not tested until late | High | Medium | Add backup/restore verification before production release | Open |
 | R-008 | Scope grows before core registry is stable | Medium | Medium | Follow checkpoint order and defer non-MVP features | Open |
 | R-009 | Local laptop lacks global Node/npm/Docker | Medium | High | Use ignored project-local Node for development; keep Docker optional until available | Mitigated |
-| R-010 | Native SQLite package may fail to install on Windows without build tools | Medium | Medium | Defer driver choice to database phase and prefer stable prebuilt or pure-JS-compatible approach | Open |
+| R-010 | Native SQLite package may fail to install on Windows without build tools | Medium | Medium | Use Node.js built-in `node:sqlite`; avoid native package dependency for foundation phase | Mitigated |
+| R-011 | `node:sqlite` requires a modern Node runtime | Medium | Medium | Pin Docker to Node 24 and provide project-local Node bootstrap script | Open |
 
 ## Risk Handling Rule
 

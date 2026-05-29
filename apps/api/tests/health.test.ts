@@ -20,6 +20,9 @@ describe("GET /api/health", () => {
       app: "family-registry-api",
       database: {
         configured: true,
+        migrationsApplied: 0,
+        migrationsPending: 0,
+        path: "file:<local-sqlite-path>",
         url: "file:<local-sqlite-path>"
       },
       environment: "test",
@@ -28,4 +31,3 @@ describe("GET /api/health", () => {
     });
   });
 });
-

@@ -21,8 +21,8 @@
 
 # Family data, exports, imports, and backups
 data/
-database/
-db/
+/database/
+/db/
 backups/
 backup/
 exports/

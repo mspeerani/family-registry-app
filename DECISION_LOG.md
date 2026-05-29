@@ -63,3 +63,19 @@ Decision: The `v0.2.0` scaffold includes SQLite configuration placeholders but d
 Reason: Native SQLite packages can add installation risk. The scaffold phase should prove app structure first, then the database phase can evaluate the safest production driver.
 
 Date: 2026-05-29
+
+## D-009 - SQLite Runtime
+
+Decision: Use Node.js built-in `node:sqlite` for the database foundation.
+
+Reason: It works in the project-local Node 24 LTS runtime and avoids native package installation risk on Windows.
+
+Date: 2026-05-29
+
+## D-010 - Migration Immutability
+
+Decision: Tagged migrations should not be rewritten after release.
+
+Reason: Forward-only migrations keep production upgrades auditable and reduce data-loss risk.
+
+Date: 2026-05-29
