@@ -13,6 +13,14 @@ The documents are intended to be handed directly to a developer without requirin
 - [I18N_SPEC.md](I18N_SPEC.md) - English, Urdu, Gujarati localization model and translation keys.
 - [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) - phased build plan and milestone deliverables.
 - [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md) - testable completion checklist.
+- [PROJECT_STATUS.md](PROJECT_STATUS.md) - current phase, scope boundaries, and operating status.
+- [QUALITY_PLAN.md](QUALITY_PLAN.md) - quality gates, self-audit loop, and verification rules.
+- [CHECKPOINTS.md](CHECKPOINTS.md) - phase checkpoints, exit criteria, and release tags.
+- [RISK_REGISTER.md](RISK_REGISTER.md) - tracked project risks and mitigations.
+- [DECISION_LOG.md](DECISION_LOG.md) - architecture and product decisions.
+- [EVAL_PLAN.md](EVAL_PLAN.md) - stress, quality, privacy, and regression evaluation plan.
+- [RELEASE_PLAN.md](RELEASE_PLAN.md) - versioning, release, tag, and rollback rules.
+- [SECURITY_PRIVACY_GUARDRAILS.md](SECURITY_PRIVACY_GUARDRAILS.md) - public repository safety rules.
 
 ## Product Summary
 
@@ -32,3 +40,17 @@ Build a slim, efficient family knowledge app for extended family data. The datab
 
 The family tree is a view of the data, not the data itself. The source of truth is a connected database of people, relationships, events, photos, places, and sources.
 
+## Current Checkpoint
+
+Current baseline:
+
+```text
+v0.1.0 - initial project documentation pack
+v0.1.1 - governance and quality assurance system
+```
+
+Before every release, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\project_audit.ps1
+```
