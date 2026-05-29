@@ -79,3 +79,19 @@ Decision: Tagged migrations should not be rewritten after release.
 Reason: Forward-only migrations keep production upgrades auditable and reduce data-loss risk.
 
 Date: 2026-05-29
+
+## D-011 - Archive Instead Of Delete For People
+
+Decision: The person delete endpoint archives a record by setting `is_archived = 1`.
+
+Reason: Family history records should not be permanently removed during normal use, and archive behavior preserves auditability.
+
+Date: 2026-05-29
+
+## D-012 - Place Names Through Places Table
+
+Decision: Person birth, death, and burial place inputs are stored through the `places` table rather than free-text columns on `people`.
+
+Reason: This preserves the normalized schema from the data model while allowing a simple UI field in the registry.
+
+Date: 2026-05-29

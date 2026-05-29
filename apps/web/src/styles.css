@@ -21,6 +21,7 @@ body {
 
 button,
 input,
+textarea,
 select {
   font: inherit;
 }
@@ -225,6 +226,79 @@ td {
   margin-top: 14px;
 }
 
+.panel-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.person-form {
+  display: grid;
+  gap: 10px;
+}
+
+.person-form label {
+  display: grid;
+  gap: 4px;
+}
+
+.person-form label span {
+  color: #46534d;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.person-form input,
+.person-form select,
+.person-form textarea {
+  border: 1px solid #cfd8d3;
+  border-radius: 6px;
+  min-height: 34px;
+  padding: 6px 8px;
+  width: 100%;
+}
+
+.person-form textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.person-form input[readonly],
+.person-form textarea[readonly],
+.person-form select:disabled {
+  background: #f4f7f5;
+  color: #1d252c;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.danger {
+  border-color: #a95b5b;
+  color: #8a2f2f;
+  justify-content: center;
+}
+
+.error-line {
+  background: #fff2f0;
+  border: 1px solid #e0a09a;
+  border-radius: 6px;
+  color: #7d2b23;
+  margin: 0 0 10px;
+  padding: 8px 10px;
+}
+
+.selected-row {
+  background: #edf5f2;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
 .relation-list span,
 .relation-list strong {
   border: 1px solid #d7ded9;
@@ -304,4 +378,3 @@ td {
     min-height: 36px;
   }
 }
-

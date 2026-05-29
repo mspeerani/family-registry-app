@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 2 - Database Foundation And Migrations
+Phase: 3 - Person Registry
 
 Current release target:
 
 ```text
-v0.3.0 - database foundation and migrations
+v0.4.0 - SQLite-backed person registry
 ```
 
 Previous release:
 
 ```text
-v0.2.0 - runnable application scaffold
+v0.3.0 - database foundation and migrations
 ```
 
 ## Scope Boundary
@@ -67,16 +67,16 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.3.0`, the next target is:
+After `v0.4.0`, the next target is:
 
 ```text
-v0.4.0 - person registry
+v0.5.0 - relationships and derived family links
 ```
 
-Expected `v0.4.0` contents:
+Expected `v0.5.0` contents:
 
-- Person create/read/update/archive APIs
-- Person registry UI wired to API
-- Person profile view backed by SQLite
-- Missing optional data support
-- API and UI tests for person workflows
+- Relationship editor
+- Father, mother, spouse, child, sibling, guardian, and other links
+- Self-relationship blocking
+- Duplicate active link blocking
+- Derived children and grandchildren

@@ -8,64 +8,50 @@ import {
   Search,
   Upload
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
+import {
+  archivePerson,
+  createPerson,
+  fetchPeople,
+  updatePerson,
+  type Person
+} from "./api";
 import { localeMeta, t, type Locale } from "./i18n";
-
-const people = [
-  {
-    birthDate: "1952-04-16",
-    birthPlace: "Sample City",
-    children: 4,
-    confidence: "Confirmed",
-    deathDate: "",
-    fatherName: "Hassan Sample",
-    fullName: "Ahmed Hassan",
-    spouse: "Fatima Ahmed",
-    surname: "Sample"
-  },
-  {
-    birthDate: "1958-09-03",
-    birthPlace: "Example Town",
-    children: 3,
-    confidence: "Likely",
-    deathDate: "",
-    fatherName: "Ibrahim Example",
-    fullName: "Fatima Ibrahim",
-    spouse: "Ahmed Hassan",
-    surname: "Example"
-  },
-  {
-    birthDate: "1931-01-28",
-    birthPlace: "Demo Village",
-    children: 6,
-    confidence: "Approximate",
-    deathDate: "2011-05-31",
-    fatherName: "Yusuf Demo",
-    fullName: "Hassan Yusuf",
-    spouse: "",
-    surname: "Demo"
-  }
-];
+import { emptyPersonForm, formFromPerson, toPersonPayload, type PersonForm } from "./personForm";
 
 const reminders = {
   next: ["Ahmed Hassan - Birth", "Hassan Yusuf - Death"],
   past: ["Fatima Ibrahim - Birth"]
 };
 
+type Mode = "view" | "edit" | "new";
+
 export default function App() {
   const [locale, setLocale] = useState<Locale>("en");
   const [query, setQuery] = useState("");
+  const [people, setPeople] = useState<Person[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [form, setForm] = useState<PersonForm>(emptyPersonForm);
+  const [mode, setMode] = useState<Mode>("new");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const labels = useMemo(
     () => ({
       addPerson: t(locale, "addPerson"),
       appName: t(locale, "appName"),
+      archive: t(locale, "archive"),
+      biography: t(locale, "biography"),
       birthDate: t(locale, "birthDate"),
       birthPlace: t(locale, "birthPlace"),
+      cancel: t(locale, "cancel"),
       children: t(locale, "children"),
       confidence: t(locale, "confidence"),
       deathDate: t(locale, "deathDate"),
+      deathPlace: t(locale, "deathPlace"),
+      edit: t(locale, "edit"),
+      error: t(locale, "error"),
       export: t(locale, "export"),
       fatherName: t(locale, "fatherName"),
       filters: t(locale, "filters"),
@@ -74,11 +60,13 @@ export default function App() {
       import: t(locale, "import"),
       language: t(locale, "language"),
       next5: t(locale, "next5"),
+      noRecords: t(locale, "noRecords"),
       past5: t(locale, "past5"),
+      profile: t(locale, "profile"),
       registry: t(locale, "registry"),
       reminders: t(locale, "reminders"),
+      save: t(locale, "save"),
       search: t(locale, "search"),
-      spouse: t(locale, "spouse"),
       surname: t(locale, "surname"),
       tree: t(locale, "tree")
     }),
@@ -90,10 +78,107 @@ export default function App() {
     document.documentElement.dir = localeMeta[locale].dir;
   }, [locale]);
 
-  const filteredPeople = people.filter((person) => {
-    const haystack = Object.values(person).join(" ").toLowerCase();
-    return haystack.includes(query.toLowerCase());
-  });
+  useEffect(() => {
+    let isCurrent = true;
+
+    setIsLoading(true);
+    fetchPeople(query)
+      .then((records) => {
+        if (!isCurrent) {
+          return;
+        }
+
+        setPeople(records);
+        setError(null);
+
+        if (records.length > 0 && !selectedId) {
+          setSelectedId(records[0].id);
+          setForm(formFromPerson(records[0]));
+          setMode("view");
+        }
+      })
+      .catch((caught: unknown) => {
+        if (isCurrent) {
+          setError(caught instanceof Error ? caught.message : "Unable to load people.");
+        }
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [query, selectedId]);
+
+  const selectedPerson = people.find((person) => person.id === selectedId) ?? null;
+  const isReadOnly = mode === "view";
+
+  function updateForm<K extends keyof PersonForm>(key: K, value: PersonForm[K]) {
+    setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function startNewPerson() {
+    setSelectedId(null);
+    setForm(emptyPersonForm);
+    setMode("new");
+  }
+
+  function selectPerson(person: Person) {
+    setSelectedId(person.id);
+    setForm(formFromPerson(person));
+    setMode("view");
+  }
+
+  async function reloadPeople(nextSelectedId?: string) {
+    const records = await fetchPeople(query);
+    setPeople(records);
+
+    if (nextSelectedId) {
+      const nextPerson = records.find((person) => person.id === nextSelectedId);
+      if (nextPerson) {
+        selectPerson(nextPerson);
+      }
+    }
+  }
+
+  async function handleSave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+
+    try {
+      const payload = toPersonPayload(form);
+      const saved =
+        mode === "edit" && form.id
+          ? await updatePerson(form.id, payload)
+          : await createPerson(payload);
+
+      await reloadPeople(saved.id);
+      setMode("view");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to save person.");
+    }
+  }
+
+  async function handleArchive() {
+    if (!selectedPerson) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      await archivePerson(selectedPerson.id);
+      setSelectedId(null);
+      setForm(emptyPersonForm);
+      setMode("new");
+      await reloadPeople();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to archive person.");
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -120,7 +205,7 @@ export default function App() {
         </nav>
 
         <div className="actions">
-          <button className="primary" type="button">
+          <button className="primary" type="button" onClick={startNewPerson}>
             <Plus aria-hidden="true" size={16} />
             {labels.addPerson}
           </button>
@@ -165,8 +250,14 @@ export default function App() {
         <section className="registry" aria-label={labels.registry}>
           <div className="section-heading">
             <h1>{labels.registry}</h1>
-            <span>{filteredPeople.length}</span>
+            <span>{people.length}</span>
           </div>
+
+          {error ? (
+            <p className="error-line">
+              {labels.error}: {error}
+            </p>
+          ) : null}
 
           <div className="table-wrap">
             <table>
@@ -178,37 +269,153 @@ export default function App() {
                   <th>{labels.birthDate}</th>
                   <th>{labels.birthPlace}</th>
                   <th>{labels.deathDate}</th>
-                  <th>{labels.spouse}</th>
-                  <th>{labels.children}</th>
+                  <th>{labels.deathPlace}</th>
                   <th>{labels.confidence}</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPeople.map((person) => (
-                  <tr key={`${person.fullName}-${person.fatherName}`}>
+                {people.map((person) => (
+                  <tr
+                    key={person.id}
+                    className={person.id === selectedId ? "selected-row" : undefined}
+                    onClick={() => selectPerson(person)}
+                  >
                     <td>{person.fullName}</td>
-                    <td>{person.fatherName}</td>
-                    <td>{person.surname}</td>
-                    <td>{person.birthDate}</td>
-                    <td>{person.birthPlace}</td>
-                    <td>{person.deathDate || "-"}</td>
-                    <td>{person.spouse || "-"}</td>
-                    <td>{person.children}</td>
-                    <td>{person.confidence}</td>
+                    <td>{person.fatherName || "-"}</td>
+                    <td>{person.surname || "-"}</td>
+                    <td>{person.birthDateGregorian || "-"}</td>
+                    <td>{person.birthPlace || "-"}</td>
+                    <td>{person.deathDateGregorian || "-"}</td>
+                    <td>{person.deathPlace || "-"}</td>
+                    <td>{person.dataConfidence}</td>
                   </tr>
                 ))}
+                {!isLoading && people.length === 0 ? (
+                  <tr>
+                    <td colSpan={8}>{labels.noRecords}</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
         </section>
 
-        <aside className="family-panel" aria-label={labels.tree}>
-          <h2>{labels.tree}</h2>
-          <div className="relation-list">
-            <span>Hassan Yusuf</span>
-            <strong>Ahmed Hassan</strong>
-            <span>Fatima Ibrahim</span>
+        <aside className="family-panel" aria-label={labels.profile}>
+          <div className="panel-heading">
+            <h2>{labels.profile}</h2>
+            {mode === "view" && selectedPerson ? (
+              <button type="button" onClick={() => setMode("edit")}>
+                {labels.edit}
+              </button>
+            ) : null}
           </div>
+
+          <form className="person-form" onSubmit={handleSave}>
+            <label>
+              <span>{labels.fullName}</span>
+              <input
+                required
+                readOnly={isReadOnly}
+                value={form.fullName}
+                onChange={(event) => updateForm("fullName", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>{labels.fatherName}</span>
+              <input
+                readOnly={isReadOnly}
+                value={form.fatherName}
+                onChange={(event) => updateForm("fatherName", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>{labels.surname}</span>
+              <input
+                readOnly={isReadOnly}
+                value={form.surname}
+                onChange={(event) => updateForm("surname", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>{labels.birthDate}</span>
+              <input
+                readOnly={isReadOnly}
+                value={form.birthDateGregorian}
+                onChange={(event) => updateForm("birthDateGregorian", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>{labels.birthPlace}</span>
+              <input
+                readOnly={isReadOnly}
+                value={form.birthPlace}
+                onChange={(event) => updateForm("birthPlace", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>{labels.deathDate}</span>
+              <input
+                readOnly={isReadOnly}
+                value={form.deathDateGregorian}
+                onChange={(event) => updateForm("deathDateGregorian", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>{labels.deathPlace}</span>
+              <input
+                readOnly={isReadOnly}
+                value={form.deathPlace}
+                onChange={(event) => updateForm("deathPlace", event.target.value)}
+              />
+            </label>
+            <label>
+              <span>{labels.confidence}</span>
+              <select
+                disabled={isReadOnly}
+                value={form.dataConfidence}
+                onChange={(event) => updateForm("dataConfidence", event.target.value)}
+              >
+                <option value="unknown">unknown</option>
+                <option value="approximate">approximate</option>
+                <option value="likely">likely</option>
+                <option value="confirmed">confirmed</option>
+              </select>
+            </label>
+            <label>
+              <span>{labels.biography}</span>
+              <textarea
+                readOnly={isReadOnly}
+                value={form.biography}
+                onChange={(event) => updateForm("biography", event.target.value)}
+              />
+            </label>
+
+            {mode !== "view" ? (
+              <div className="form-actions">
+                <button className="primary" type="submit">
+                  {labels.save}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedPerson) {
+                      selectPerson(selectedPerson);
+                    } else {
+                      startNewPerson();
+                    }
+                  }}
+                >
+                  {labels.cancel}
+                </button>
+              </div>
+            ) : null}
+
+            {mode === "view" && selectedPerson ? (
+              <button className="danger" type="button" onClick={handleArchive}>
+                {labels.archive}
+              </button>
+            ) : null}
+          </form>
         </aside>
       </main>
 

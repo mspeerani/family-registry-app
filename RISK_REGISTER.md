@@ -13,6 +13,7 @@
 | R-009 | Local laptop lacks global Node/npm/Docker | Medium | High | Use ignored project-local Node for development; keep Docker optional until available | Mitigated |
 | R-010 | Native SQLite package may fail to install on Windows without build tools | Medium | Medium | Use Node.js built-in `node:sqlite`; avoid native package dependency for foundation phase | Mitigated |
 | R-011 | `node:sqlite` requires a modern Node runtime | Medium | Medium | Pin Docker to Node 24 and provide project-local Node bootstrap script | Open |
+| R-012 | Public demo UI could encourage entering real data before auth/backup exists | High | Medium | Keep repo warnings, ignored database files, and delay real data entry until production controls are complete | Open |
 
 ## Risk Handling Rule
 

@@ -1,13 +1,15 @@
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
+import type { DatabaseSync } from "node:sqlite";
 
 import { type AppConfig, getConfig, redactDatabaseUrl } from "./config.js";
 import type { DatabaseHealth } from "./db/database.js";
+import { createPeopleRouter } from "./people/personRoutes.js";
 
 export function createApp(
   config: AppConfig = getConfig(),
-  databaseHealth?: DatabaseHealth
+  services: { database?: DatabaseSync; databaseHealth?: DatabaseHealth } = {}
 ): Express {
   const app = express();
 
@@ -19,7 +21,7 @@ export function createApp(
     response.json({
       app: "family-registry-api",
       database:
-        databaseHealth ??
+        services.databaseHealth ??
         {
           configured: Boolean(config.DATABASE_URL),
           migrationsApplied: 0,
@@ -34,6 +36,10 @@ export function createApp(
     });
   });
 
+  if (services.database) {
+    app.use("/api/people", createPeopleRouter(services.database));
+  }
+
   app.use((_request, response) => {
     response.status(404).json({
       error: {
@@ -42,6 +48,28 @@ export function createApp(
       }
     });
   });
+
+  app.use(
+    (
+      error: unknown,
+      _request: express.Request,
+      response: express.Response,
+      _next: express.NextFunction
+    ) => {
+    console.error(error);
+    response.status(500).json({
+      error: {
+        code: "internal_error",
+        message:
+          config.APP_ENV === "production"
+            ? "An internal error occurred."
+            : error instanceof Error
+              ? error.message
+              : "An internal error occurred."
+      }
+    });
+    }
+  );
 
   return app;
 }

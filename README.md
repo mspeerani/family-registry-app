@@ -23,6 +23,7 @@ The documents are intended to be handed directly to a developer without requirin
 - [SECURITY_PRIVACY_GUARDRAILS.md](SECURITY_PRIVACY_GUARDRAILS.md) - public repository safety rules.
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - local development and runtime setup.
 - [docs/DATABASE.md](docs/DATABASE.md) - SQLite migration and fake seed data guide.
+- [docs/API.md](docs/API.md) - current backend API endpoints.
 
 ## Product Summary
 
@@ -51,6 +52,7 @@ v0.1.0 - initial project documentation pack
 v0.1.1 - governance and quality assurance system
 v0.2.0 - runnable application scaffold
 v0.3.0 - database foundation and migrations
+v0.4.0 - SQLite-backed person registry
 ```
 
 Before every release, run:

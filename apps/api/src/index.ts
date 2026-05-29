@@ -5,7 +5,10 @@ import { getDatabaseHealth, openDatabase, runMigrations } from "./db/database.js
 const config = getConfig();
 const database = openDatabase(config);
 const migrationState = runMigrations(database.database);
-const app = createApp(config, getDatabaseHealth(config, migrationState));
+const app = createApp(config, {
+  database: database.database,
+  databaseHealth: getDatabaseHealth(config, migrationState)
+});
 
 app.listen(config.APP_PORT, () => {
   console.log(`Family Registry API listening on port ${config.APP_PORT}`);

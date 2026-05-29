@@ -5,14 +5,17 @@ import { createApp } from "../src/app.js";
 
 describe("GET /api/health", () => {
   it("returns scaffold health status without exposing a local database path", async () => {
-    const app = createApp({
-      APP_ENV: "test",
-      APP_PORT: 3001,
-      DATABASE_URL: "file:./data/family_registry.sqlite",
-      DEFAULT_LOCALE: "en",
-      SESSION_SECRET: undefined,
-      UPLOAD_DIR: "./data/uploads"
-    });
+    const app = createApp(
+      {
+        APP_ENV: "test",
+        APP_PORT: 3001,
+        DATABASE_URL: "file:./data/family_registry.sqlite",
+        DEFAULT_LOCALE: "en",
+        SESSION_SECRET: undefined,
+        UPLOAD_DIR: "./data/uploads"
+      },
+      {}
+    );
 
     const response = await request(app).get("/api/health").expect(200);
 
