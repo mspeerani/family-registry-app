@@ -10,8 +10,9 @@
 | R-006 | Import creates duplicates | Medium | Medium | Import preview, duplicate warnings, no automatic merge | Open |
 | R-007 | Backup/restore is not tested until late | High | Medium | Add backup/restore verification before production release | Open |
 | R-008 | Scope grows before core registry is stable | Medium | Medium | Follow checkpoint order and defer non-MVP features | Open |
+| R-009 | Local laptop lacks global Node/npm/Docker | Medium | High | Use ignored project-local Node for development; keep Docker optional until available | Mitigated |
+| R-010 | Native SQLite package may fail to install on Windows without build tools | Medium | Medium | Defer driver choice to database phase and prefer stable prebuilt or pure-JS-compatible approach | Open |
 
 ## Risk Handling Rule
 
 Any new high-impact risk must be added here before continuing the phase. If the risk affects privacy or data loss, stop feature work until mitigation is defined.
-

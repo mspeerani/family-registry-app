@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 0 - Governance and Quality System
+Phase: 1 - Runnable App Scaffold
 
 Current release target:
 
 ```text
-v0.1.1 - governance and quality assurance system
+v0.2.0 - runnable application scaffold
 ```
 
 Previous release:
 
 ```text
-v0.1.0 - initial project documentation pack
+v0.1.1 - governance and quality assurance system
 ```
 
 ## Scope Boundary
@@ -67,20 +67,17 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.1.1`, the next target is:
+After `v0.2.0`, the next target is:
 
 ```text
-v0.2.0 - runnable application scaffold
+v0.3.0 - database foundation and migrations
 ```
 
-Expected `v0.2.0` contents:
+Expected `v0.3.0` contents:
 
-- Frontend scaffold
-- Backend scaffold
-- SQLite setup placeholder
-- Health check API
-- Local development commands
-- Docker Compose skeleton
-- `.env.example`
-- Initial automated checks
-
+- SQLite connection
+- Migration system
+- Core database tables
+- Fake seed data
+- Migration tests
+- Database safety checks

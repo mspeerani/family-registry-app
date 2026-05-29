@@ -54,12 +54,14 @@ media/private/
 !.gitkeep
 
 # Application dependencies and build output
+.tools/
 node_modules/
 dist/
 build/
 .vite/
 .next/
 coverage/
+*.tsbuildinfo
 
 # Logs and runtime files
 logs/
@@ -85,4 +87,3 @@ Desktop.ini
 .vscode/
 *.swp
 *.swo
-

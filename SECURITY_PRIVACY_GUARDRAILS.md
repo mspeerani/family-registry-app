@@ -38,6 +38,7 @@ uploads/
 backups/
 imports/
 exports/
+.tools/
 ```
 
 These paths are ignored by `.gitignore`.
@@ -67,3 +68,6 @@ Use `.env.example` for documented configuration names. Use `.env` locally for re
 
 Do not commit photos. UI fixtures may use generated placeholders or simple local SVG/PNG assets only if they contain no real people and no private family information.
 
+## Project-Local Tooling Rule
+
+Project-local downloaded tools may live in `.tools/`. This folder is ignored by Git and must not be published.

@@ -40,3 +40,26 @@ Reason: The project involves private family data and a public repository, so saf
 
 Date: 2026-05-29
 
+## D-006 - Initial App Stack
+
+Decision: Use a TypeScript monorepo with React/Vite for the web app and Express for the API.
+
+Reason: This matches the PRD recommendation, keeps the stack common for developers, and supports a thin UI with a small API server.
+
+Date: 2026-05-29
+
+## D-007 - Project-Local Runtime On This Laptop
+
+Decision: Use a portable Node runtime under `.tools/` on this laptop when global Node/npm are unavailable.
+
+Reason: The user authorized project-folder changes only. A project-local ignored runtime allows testing without changing system software.
+
+Date: 2026-05-29
+
+## D-008 - Database Driver Deferred To Database Phase
+
+Decision: The `v0.2.0` scaffold includes SQLite configuration placeholders but defers the concrete SQLite driver and migrations to `v0.3.0`.
+
+Reason: Native SQLite packages can add installation risk. The scaffold phase should prove app structure first, then the database phase can evaluate the safest production driver.
+
+Date: 2026-05-29

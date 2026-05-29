@@ -54,3 +54,47 @@ Before every release, run:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\project_audit.ps1
 ```
+
+## Run The Scaffold
+
+Install dependencies:
+
+```powershell
+npm install
+```
+
+Run API and web:
+
+```powershell
+npm run dev
+```
+
+Default local URLs:
+
+```text
+API health: http://localhost:3001/api/health
+Web app:    http://localhost:5173
+```
+
+Run quality checks:
+
+```powershell
+npm run check
+```
+
+On this laptop, if global Node/npm is unavailable, first run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap_local_node.ps1
+```
+
+Then add the generated `.tools\node-...\` folder to the current PowerShell `Path` as shown by the script.
+
+If PowerShell blocks `npm.ps1`, use `npm.cmd`:
+
+```powershell
+$nodeDir = Get-ChildItem .\.tools -Directory -Filter "node-*-win-x64" | Select-Object -First 1 -ExpandProperty FullName
+$env:Path = "$nodeDir;$env:Path"
+& "$nodeDir\npm.cmd" install
+& "$nodeDir\npm.cmd" run check
+```

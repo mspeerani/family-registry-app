@@ -109,6 +109,15 @@ if ($missingIgnoreEntries.Count -gt 0) {
 }
 
 if ($Strict) {
+  $excludedDirectoryPatterns = @(
+    '\\.git\\',
+    '\\.tools\\',
+    '\\node_modules\\',
+    '\\dist\\',
+    '\\build\\',
+    '\\coverage\\'
+  )
+
   $secretPatterns = @(
     'sk-[A-Za-z0-9_-]{20,}',
     'ghp_[A-Za-z0-9_]{20,}',
@@ -118,7 +127,10 @@ if ($Strict) {
   )
 
   $secretHits = Get-ChildItem -Path $root -Recurse -File -Include *.md,*.ts,*.tsx,*.js,*.jsx,*.ps1,*.json,*.yml,*.yaml |
-    Where-Object { $_.FullName -notmatch '\\.git\\' } |
+    Where-Object {
+      $path = $_.FullName
+      -not ($excludedDirectoryPatterns | Where-Object { $path -match $_ })
+    } |
     Select-String -Pattern $secretPatterns
 
   if ($secretHits) {
