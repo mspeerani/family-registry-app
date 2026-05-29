@@ -11,32 +11,33 @@ import {
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  advancedSearchPeople,
   archivePerson,
   createRelationship,
   createPerson,
   fetchFamilyProfile,
   fetchPeople,
+  fetchReminderWindow,
   updatePerson,
   type FamilyProfile,
-  type Person
+  type Person,
+  type ReminderWindow
 } from "./api";
 import { localeMeta, t, type Locale } from "./i18n";
 import { emptyPersonForm, formFromPerson, toPersonPayload, type PersonForm } from "./personForm";
-
-const reminders = {
-  next: ["Ahmed Hassan - Birth", "Hassan Yusuf - Death"],
-  past: ["Fatima Ibrahim - Birth"]
-};
 
 type Mode = "view" | "edit" | "new";
 
 export default function App() {
   const [locale, setLocale] = useState<Locale>("en");
   const [query, setQuery] = useState("");
+  const [missingBirthDate, setMissingBirthDate] = useState(false);
+  const [missingFatherName, setMissingFatherName] = useState(false);
   const [people, setPeople] = useState<Person[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<PersonForm>(emptyPersonForm);
   const [profile, setProfile] = useState<FamilyProfile | null>(null);
+  const [reminders, setReminders] = useState<ReminderWindow>({ future: [], past: [] });
   const [mode, setMode] = useState<Mode>("new");
   const [relatedPersonId, setRelatedPersonId] = useState("");
   const [relationshipType, setRelationshipType] = useState("father");
@@ -66,6 +67,8 @@ export default function App() {
       graph: t(locale, "graph"),
       import: t(locale, "import"),
       language: t(locale, "language"),
+      missingBirthDate: t(locale, "missingBirthDate"),
+      missingFatherName: t(locale, "missingFatherName"),
       next5: t(locale, "next5"),
       noRecords: t(locale, "noRecords"),
       parents: t(locale, "parents"),
@@ -90,11 +93,23 @@ export default function App() {
     document.documentElement.dir = localeMeta[locale].dir;
   }, [locale]);
 
+  async function loadPeopleRecords() {
+    if (missingBirthDate || missingFatherName) {
+      return advancedSearchPeople({
+        missingBirthDate,
+        missingFatherName,
+        query
+      });
+    }
+
+    return fetchPeople(query);
+  }
+
   useEffect(() => {
     let isCurrent = true;
 
     setIsLoading(true);
-    fetchPeople(query)
+    loadPeopleRecords()
       .then((records) => {
         if (!isCurrent) {
           return;
@@ -123,7 +138,15 @@ export default function App() {
     return () => {
       isCurrent = false;
     };
-  }, [query, selectedId]);
+  }, [query, selectedId, missingBirthDate, missingFatherName]);
+
+  useEffect(() => {
+    fetchReminderWindow()
+      .then(setReminders)
+      .catch((caught: unknown) => {
+        setError(caught instanceof Error ? caught.message : "Unable to load reminders.");
+      });
+  }, []);
 
   useEffect(() => {
     if (!selectedId) {
@@ -171,7 +194,7 @@ export default function App() {
   }
 
   async function reloadPeople(nextSelectedId?: string) {
-    const records = await fetchPeople(query);
+    const records = await loadPeopleRecords();
     setPeople(records);
 
     if (nextSelectedId) {
@@ -304,6 +327,22 @@ export default function App() {
                 placeholder={labels.search}
               />
             </div>
+          </label>
+          <label className="check-field">
+            <input
+              checked={missingBirthDate}
+              type="checkbox"
+              onChange={(event) => setMissingBirthDate(event.target.checked)}
+            />
+            <span>{labels.missingBirthDate}</span>
+          </label>
+          <label className="check-field">
+            <input
+              checked={missingFatherName}
+              type="checkbox"
+              onChange={(event) => setMissingFatherName(event.target.checked)}
+            />
+            <span>{labels.missingFatherName}</span>
           </label>
         </aside>
 
@@ -531,15 +570,19 @@ export default function App() {
           <h2>{labels.past5}</h2>
           <ul>
             {reminders.past.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={`${item.personId}-${item.eventType}-${item.occurrenceDate}`}>
+                {item.personName} - {item.eventType}
+              </li>
             ))}
           </ul>
         </section>
         <section>
           <h2>{labels.next5}</h2>
           <ul>
-            {reminders.next.map((item) => (
-              <li key={item}>{item}</li>
+            {reminders.future.map((item) => (
+              <li key={`${item.personId}-${item.eventType}-${item.occurrenceDate}`}>
+                {item.personName} - {item.eventType}
+              </li>
             ))}
           </ul>
         </section>

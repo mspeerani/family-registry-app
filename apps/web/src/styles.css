@@ -171,6 +171,22 @@ h2 {
   width: 100%;
 }
 
+.check-field {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.check-field input {
+  height: 16px;
+  width: 16px;
+}
+
+.check-field span {
+  font-size: 0.84rem;
+}
+
 .section-heading {
   align-items: center;
   display: flex;

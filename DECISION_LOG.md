@@ -103,3 +103,11 @@ Decision: Relationship rows use `person_id` as the subject and `related_person_i
 Reason: This matches the data model and supports derived parent, spouse, child, and grandchild views without duplicating relationship facts.
 
 Date: 2026-05-29
+
+## D-014 - Reminder Eligibility
+
+Decision: Reminder windows include only Gregorian dates with known month and day.
+
+Reason: Year-only and approximate dates cannot produce reliable daily reminders. Hijri reminder logic remains a later enhancement after manual/auto Hijri handling is complete.
+
+Date: 2026-05-29

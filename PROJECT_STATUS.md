@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 4 - Relationships And Derived Family Links
+Phase: 5 - Search And Reminders
 
 Current release target:
 
 ```text
-v0.5.0 - relationships and derived family links
+v0.6.0 - search filters and reminders
 ```
 
 Previous release:
 
 ```text
-v0.4.0 - SQLite-backed person registry
+v0.5.0 - relationships and derived family links
 ```
 
 ## Scope Boundary
@@ -67,16 +67,16 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.5.0`, the next target is:
+After `v0.6.0`, the next target is:
 
 ```text
-v0.6.0 - search and reminders
+v0.7.0 - multilingual UI hardening
 ```
 
-Expected `v0.6.0` contents:
+Expected `v0.7.0` contents:
 
-- Advanced search filters
-- Missing-data filters
-- Birthday reminder window
-- Death-anniversary reminder window
-- Past 5 / next 5 summary backed by database
+- Persisted language preference
+- Urdu RTL smoke verification
+- Gujarati layout smoke verification
+- Translation coverage check
+- Multilingual UI cleanup

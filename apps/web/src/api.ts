@@ -45,6 +45,27 @@ export type RelationshipPayload = {
   relationshipType: string;
 };
 
+export type AdvancedSearchPayload = {
+  missingBirthDate?: boolean;
+  missingFatherName?: boolean;
+  query?: string;
+};
+
+export type ReminderEvent = {
+  eventType: "birth" | "death";
+  fatherName: string | null;
+  gregorianDate: string;
+  hijriDate: string | null;
+  occurrenceDate: string;
+  personId: string;
+  personName: string;
+};
+
+export type ReminderWindow = {
+  future: ReminderEvent[];
+  past: ReminderEvent[];
+};
+
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     headers: {
@@ -71,6 +92,14 @@ export async function fetchPeople(query = ""): Promise<Person[]> {
 
   const suffix = params.toString() ? `?${params.toString()}` : "";
   const result = await requestJson<{ people: Person[] }>(`/api/people${suffix}`);
+  return result.people;
+}
+
+export async function advancedSearchPeople(payload: AdvancedSearchPayload): Promise<Person[]> {
+  const result = await requestJson<{ people: Person[] }>("/api/search/advanced", {
+    body: JSON.stringify(payload),
+    method: "POST"
+  });
   return result.people;
 }
 
@@ -106,4 +135,8 @@ export async function createRelationship(payload: RelationshipPayload): Promise<
     body: JSON.stringify(payload),
     method: "POST"
   });
+}
+
+export async function fetchReminderWindow(): Promise<ReminderWindow> {
+  return requestJson<ReminderWindow>("/api/reminders/window?pastDays=5&futureDays=5");
 }

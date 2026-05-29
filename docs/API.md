@@ -187,3 +187,60 @@ Returns:
 - Self-relationships return `400 self_relationship`.
 - Duplicate relationship links return `409 duplicate_relationship`.
 - Missing people return `404 person_missing`.
+
+## Search
+
+### Basic Search
+
+```http
+GET /api/search?q=Ahmed
+```
+
+### Advanced Search
+
+```http
+POST /api/search/advanced
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "query": "Ahmed",
+  "missingBirthDate": true,
+  "missingFatherName": false,
+  "bornInPlace": "Sample City"
+}
+```
+
+## Reminders
+
+Reminder windows currently use Gregorian dates with known month and day.
+
+### Upcoming
+
+```http
+GET /api/reminders/upcoming?days=7
+```
+
+### Past/Future Window
+
+```http
+GET /api/reminders/window?pastDays=5&futureDays=5
+```
+
+For deterministic testing:
+
+```http
+GET /api/reminders/window?pastDays=5&futureDays=5&today=2026-05-29
+```
+
+Response:
+
+```json
+{
+  "past": [],
+  "future": []
+}
+```

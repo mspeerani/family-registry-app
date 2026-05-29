@@ -7,6 +7,8 @@ import { type AppConfig, getConfig, redactDatabaseUrl } from "./config.js";
 import type { DatabaseHealth } from "./db/database.js";
 import { createPeopleRouter } from "./people/personRoutes.js";
 import { createRelationshipRouter } from "./relationships/relationshipRoutes.js";
+import { createReminderRouter } from "./reminders/reminderRoutes.js";
+import { createSearchRouter } from "./search/searchRoutes.js";
 
 export function createApp(
   config: AppConfig = getConfig(),
@@ -40,6 +42,8 @@ export function createApp(
   if (services.database) {
     app.use("/api/people", createPeopleRouter(services.database));
     app.use("/api/relationships", createRelationshipRouter(services.database));
+    app.use("/api/reminders", createReminderRouter(services.database));
+    app.use("/api/search", createSearchRouter(services.database));
   }
 
   app.use((_request, response) => {
