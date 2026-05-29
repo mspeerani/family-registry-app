@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 3 - Person Registry
+Phase: 4 - Relationships And Derived Family Links
 
 Current release target:
 
 ```text
-v0.4.0 - SQLite-backed person registry
+v0.5.0 - relationships and derived family links
 ```
 
 Previous release:
 
 ```text
-v0.3.0 - database foundation and migrations
+v0.4.0 - SQLite-backed person registry
 ```
 
 ## Scope Boundary
@@ -67,16 +67,16 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.4.0`, the next target is:
+After `v0.5.0`, the next target is:
 
 ```text
-v0.5.0 - relationships and derived family links
+v0.6.0 - search and reminders
 ```
 
-Expected `v0.5.0` contents:
+Expected `v0.6.0` contents:
 
-- Relationship editor
-- Father, mother, spouse, child, sibling, guardian, and other links
-- Self-relationship blocking
-- Duplicate active link blocking
-- Derived children and grandchildren
+- Advanced search filters
+- Missing-data filters
+- Birthday reminder window
+- Death-anniversary reminder window
+- Past 5 / next 5 summary backed by database

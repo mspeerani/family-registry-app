@@ -94,3 +94,96 @@ This archives the record. It does not physically delete the row.
 - Invalid person input returns `400 validation_error`.
 - Missing person IDs return `404 not_found`.
 
+## Relationships
+
+Relationship convention:
+
+```text
+person_id -> relationship_type -> related_person_id
+```
+
+The relationship type describes how the related person is related to the subject person.
+
+Example:
+
+```json
+{
+  "personId": "child-id",
+  "relatedPersonId": "father-id",
+  "relationshipType": "father"
+}
+```
+
+This means the selected person has the related person as father.
+
+### List Relationships
+
+```http
+GET /api/relationships
+GET /api/relationships?personId=:id
+```
+
+### Create Relationship
+
+```http
+POST /api/relationships
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "personId": "person-id",
+  "relatedPersonId": "related-person-id",
+  "relationshipType": "father",
+  "confidence": "confirmed",
+  "notes": "Optional note"
+}
+```
+
+Supported relationship types:
+
+```text
+father
+mother
+spouse
+child
+sibling
+guardian
+adoptive_parent
+adoptive_child
+other
+```
+
+### Delete Relationship
+
+```http
+DELETE /api/relationships/:id
+```
+
+### Person Family Profile
+
+```http
+GET /api/people/:id/profile
+```
+
+Returns:
+
+```json
+{
+  "profile": {
+    "person": {},
+    "parents": [],
+    "spouses": [],
+    "children": [],
+    "grandchildren": []
+  }
+}
+```
+
+## Relationship Validation
+
+- Self-relationships return `400 self_relationship`.
+- Duplicate relationship links return `409 duplicate_relationship`.
+- Missing people return `404 person_missing`.

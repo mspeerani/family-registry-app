@@ -12,9 +12,12 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
   archivePerson,
+  createRelationship,
   createPerson,
+  fetchFamilyProfile,
   fetchPeople,
   updatePerson,
+  type FamilyProfile,
   type Person
 } from "./api";
 import { localeMeta, t, type Locale } from "./i18n";
@@ -33,7 +36,10 @@ export default function App() {
   const [people, setPeople] = useState<Person[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<PersonForm>(emptyPersonForm);
+  const [profile, setProfile] = useState<FamilyProfile | null>(null);
   const [mode, setMode] = useState<Mode>("new");
+  const [relatedPersonId, setRelatedPersonId] = useState("");
+  const [relationshipType, setRelationshipType] = useState("father");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -56,17 +62,23 @@ export default function App() {
       fatherName: t(locale, "fatherName"),
       filters: t(locale, "filters"),
       fullName: t(locale, "fullName"),
+      grandchildren: t(locale, "grandchildren"),
       graph: t(locale, "graph"),
       import: t(locale, "import"),
       language: t(locale, "language"),
       next5: t(locale, "next5"),
       noRecords: t(locale, "noRecords"),
+      parents: t(locale, "parents"),
       past5: t(locale, "past5"),
       profile: t(locale, "profile"),
       registry: t(locale, "registry"),
+      relatedPerson: t(locale, "relatedPerson"),
+      relationshipType: t(locale, "relationshipType"),
+      relationships: t(locale, "relationships"),
       reminders: t(locale, "reminders"),
       save: t(locale, "save"),
       search: t(locale, "search"),
+      spouse: t(locale, "spouse"),
       surname: t(locale, "surname"),
       tree: t(locale, "tree")
     }),
@@ -113,6 +125,31 @@ export default function App() {
     };
   }, [query, selectedId]);
 
+  useEffect(() => {
+    if (!selectedId) {
+      setProfile(null);
+      return;
+    }
+
+    let isCurrent = true;
+
+    fetchFamilyProfile(selectedId)
+      .then((nextProfile) => {
+        if (isCurrent) {
+          setProfile(nextProfile);
+        }
+      })
+      .catch((caught: unknown) => {
+        if (isCurrent) {
+          setError(caught instanceof Error ? caught.message : "Unable to load profile.");
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedId]);
+
   const selectedPerson = people.find((person) => person.id === selectedId) ?? null;
   const isReadOnly = mode === "view";
 
@@ -123,6 +160,7 @@ export default function App() {
   function startNewPerson() {
     setSelectedId(null);
     setForm(emptyPersonForm);
+    setProfile(null);
     setMode("new");
   }
 
@@ -173,10 +211,32 @@ export default function App() {
       await archivePerson(selectedPerson.id);
       setSelectedId(null);
       setForm(emptyPersonForm);
+      setProfile(null);
       setMode("new");
       await reloadPeople();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to archive person.");
+    }
+  }
+
+  async function handleCreateRelationship() {
+    if (!selectedPerson || !relatedPersonId) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      await createRelationship({
+        confidence: "confirmed",
+        personId: selectedPerson.id,
+        relatedPersonId,
+        relationshipType
+      });
+      setRelatedPersonId("");
+      setProfile(await fetchFamilyProfile(selectedPerson.id));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to link relationship.");
     }
   }
 
@@ -411,9 +471,56 @@ export default function App() {
             ) : null}
 
             {mode === "view" && selectedPerson ? (
-              <button className="danger" type="button" onClick={handleArchive}>
-                {labels.archive}
-              </button>
+              <>
+                <section className="family-links">
+                  <h3>{labels.relationships}</h3>
+                  <FamilyList label={labels.parents} people={profile?.parents ?? []} />
+                  <FamilyList label={labels.spouse} people={profile?.spouses ?? []} />
+                  <FamilyList label={labels.children} people={profile?.children ?? []} />
+                  <FamilyList label={labels.grandchildren} people={profile?.grandchildren ?? []} />
+                </section>
+
+                <div className="relationship-form">
+                  <label>
+                    <span>{labels.relationshipType}</span>
+                    <select
+                      value={relationshipType}
+                      onChange={(event) => setRelationshipType(event.target.value)}
+                    >
+                      <option value="father">father</option>
+                      <option value="mother">mother</option>
+                      <option value="spouse">spouse</option>
+                      <option value="child">child</option>
+                      <option value="sibling">sibling</option>
+                      <option value="guardian">guardian</option>
+                      <option value="other">other</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>{labels.relatedPerson}</span>
+                    <select
+                      value={relatedPersonId}
+                      onChange={(event) => setRelatedPersonId(event.target.value)}
+                    >
+                      <option value="">-</option>
+                      {people
+                        .filter((person) => person.id !== selectedPerson.id)
+                        .map((person) => (
+                          <option key={person.id} value={person.id}>
+                            {person.fullName}
+                          </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button type="button" onClick={handleCreateRelationship}>
+                    {labels.save}
+                  </button>
+                </div>
+
+                <button className="danger" type="button" onClick={handleArchive}>
+                  {labels.archive}
+                </button>
+              </>
             ) : null}
           </form>
         </aside>
@@ -441,3 +548,19 @@ export default function App() {
   );
 }
 
+function FamilyList({ label, people }: { label: string; people: Person[] }) {
+  return (
+    <div className="family-list">
+      <span>{label}</span>
+      {people.length > 0 ? (
+        <ul>
+          {people.map((person) => (
+            <li key={person.id}>{person.fullName}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>-</p>
+      )}
+    </div>
+  );
+}

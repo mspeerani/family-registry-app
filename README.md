@@ -53,6 +53,7 @@ v0.1.1 - governance and quality assurance system
 v0.2.0 - runnable application scaffold
 v0.3.0 - database foundation and migrations
 v0.4.0 - SQLite-backed person registry
+v0.5.0 - relationships and derived family links
 ```
 
 Before every release, run:

@@ -95,3 +95,11 @@ Decision: Person birth, death, and burial place inputs are stored through the `p
 Reason: This preserves the normalized schema from the data model while allowing a simple UI field in the registry.
 
 Date: 2026-05-29
+
+## D-013 - Relationship Direction Convention
+
+Decision: Relationship rows use `person_id` as the subject and `related_person_id` as the related object. `relationship_type` describes how the related object is related to the subject.
+
+Reason: This matches the data model and supports derived parent, spouse, child, and grandchild views without duplicating relationship facts.
+
+Date: 2026-05-29

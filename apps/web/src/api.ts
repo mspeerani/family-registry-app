@@ -29,6 +29,22 @@ export type PersonPayload = {
   surname?: string | null;
 };
 
+export type FamilyProfile = {
+  children: Person[];
+  grandchildren: Person[];
+  parents: Person[];
+  person: Person;
+  spouses: Person[];
+};
+
+export type RelationshipPayload = {
+  confidence?: string;
+  notes?: string | null;
+  personId: string;
+  relatedPersonId: string;
+  relationshipType: string;
+};
+
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     headers: {
@@ -80,3 +96,14 @@ export async function archivePerson(id: string): Promise<void> {
   });
 }
 
+export async function fetchFamilyProfile(id: string): Promise<FamilyProfile> {
+  const result = await requestJson<{ profile: FamilyProfile }>(`/api/people/${id}/profile`);
+  return result.profile;
+}
+
+export async function createRelationship(payload: RelationshipPayload): Promise<void> {
+  await requestJson<{ relationship: unknown }>("/api/relationships", {
+    body: JSON.stringify(payload),
+    method: "POST"
+  });
+}

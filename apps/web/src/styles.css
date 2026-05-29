@@ -238,12 +238,15 @@ td {
   gap: 10px;
 }
 
-.person-form label {
+.person-form label,
+.relationship-form label {
   display: grid;
   gap: 4px;
 }
 
-.person-form label span {
+.person-form label span,
+.relationship-form label span,
+.family-list > span {
   color: #46534d;
   font-size: 0.78rem;
   font-weight: 700;
@@ -251,7 +254,8 @@ td {
 
 .person-form input,
 .person-form select,
-.person-form textarea {
+.person-form textarea,
+.relationship-form select {
   border: 1px solid #cfd8d3;
   border-radius: 6px;
   min-height: 34px;
@@ -280,6 +284,50 @@ td {
   border-color: #a95b5b;
   color: #8a2f2f;
   justify-content: center;
+}
+
+.family-links {
+  border-top: 1px solid #e2e7e3;
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 10px;
+}
+
+.family-links h3 {
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.family-list {
+  display: grid;
+  gap: 3px;
+}
+
+.family-list ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.family-list li,
+.family-list p {
+  background: #eef3ef;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  margin: 0;
+  padding: 4px 7px;
+}
+
+.relationship-form {
+  border-top: 1px solid #e2e7e3;
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
 }
 
 .error-line {

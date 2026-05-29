@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 
 import { archivePerson, createPerson, getPerson, listPeople, updatePerson } from "./personRepository.js";
 import { createPersonSchema, updatePersonSchema } from "./personSchemas.js";
+import { getFamilyProfile } from "../relationships/relationshipRepository.js";
 
 export function createPeopleRouter(database: DatabaseSync): Router {
   const router = Router();
@@ -15,6 +16,21 @@ export function createPeopleRouter(database: DatabaseSync): Router {
         query: typeof request.query.q === "string" ? request.query.q : undefined
       });
       response.json({ people });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get("/:id/profile", (request, response, next) => {
+    try {
+      const profile = getFamilyProfile(database, request.params.id);
+
+      if (!profile) {
+        response.status(404).json({ error: { code: "not_found", message: "Person not found." } });
+        return;
+      }
+
+      response.json({ profile });
     } catch (error) {
       next(error);
     }
@@ -100,4 +116,3 @@ export function createPeopleRouter(database: DatabaseSync): Router {
 
   return router;
 }
-
