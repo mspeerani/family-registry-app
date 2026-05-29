@@ -1,5 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001";
 
+export function apiUrl(path: string): string {
+  return `${API_BASE_URL}${path}`;
+}
+
 export type Person = {
   biography: string | null;
   birthDateGregorian: string | null;
@@ -86,6 +90,16 @@ export type ReminderWindow = {
   past: ReminderEvent[];
 };
 
+export type ImportPreview = {
+  invalidCount: number;
+  rows: Array<{
+    errors: string[];
+    rowNumber: number;
+    warnings: string[];
+  }>;
+  validCount: number;
+};
+
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     headers: {
@@ -101,6 +115,20 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   }
 
   return (await response.json()) as T;
+}
+
+export async function previewPeopleImport(csv: string): Promise<ImportPreview> {
+  return requestJson<ImportPreview>("/api/import/people/preview", {
+    body: JSON.stringify({ csv }),
+    method: "POST"
+  });
+}
+
+export async function commitPeopleImport(csv: string): Promise<{ createdCount: number }> {
+  return requestJson<{ createdCount: number }>("/api/import/people/commit", {
+    body: JSON.stringify({ csv }),
+    method: "POST"
+  });
 }
 
 export async function fetchPeople(query = ""): Promise<Person[]> {

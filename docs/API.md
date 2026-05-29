@@ -280,3 +280,62 @@ Response:
   "future": []
 }
 ```
+
+## Import, Export, Backup
+
+### Export People CSV
+
+```http
+GET /api/export/people.csv
+```
+
+### Export Relationships CSV
+
+```http
+GET /api/export/relationships.csv
+```
+
+### Preview People CSV Import
+
+```http
+POST /api/import/people/preview
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "csv": "fullName,fatherName\nSample Person,Sample Father\n"
+}
+```
+
+### Commit People CSV Import
+
+```http
+POST /api/import/people/commit
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "csv": "fullName,fatherName\nSample Person,Sample Father\n"
+}
+```
+
+### Export JSON Backup
+
+```http
+GET /api/export/backup
+```
+
+### Restore JSON Backup
+
+```http
+POST /api/restore/backup
+Content-Type: application/json
+```
+
+Restore is destructive. It replaces current people, places, and relationships with backup data.

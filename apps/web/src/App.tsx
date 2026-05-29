@@ -8,17 +8,20 @@ import {
   Search,
   Upload
 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   advancedSearchPeople,
+  apiUrl,
   archivePerson,
+  commitPeopleImport,
   createRelationship,
   createPerson,
   fetchFamilyGraph,
   fetchFamilyProfile,
   fetchPeople,
   fetchReminderWindow,
+  previewPeopleImport,
   updatePerson,
   type FamilyGraph,
   type FamilyGraphNode,
@@ -59,12 +62,14 @@ export default function App() {
   const [relationshipType, setRelationshipType] = useState("father");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const labels = useMemo(
     () => ({
       addPerson: t(locale, "addPerson"),
       appName: t(locale, "appName"),
       archive: t(locale, "archive"),
+      backup: t(locale, "backup"),
       biography: t(locale, "biography"),
       birthDate: t(locale, "birthDate"),
       birthPlace: t(locale, "birthPlace"),
@@ -331,6 +336,52 @@ export default function App() {
     }
   }
 
+  async function downloadApiFile(path: string, filename: string) {
+    const response = await fetch(apiUrl(path));
+
+    if (!response.ok) {
+      throw new Error(`Download failed with ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      const csv = await file.text();
+      const preview = await previewPeopleImport(csv);
+
+      if (preview.invalidCount > 0) {
+        setError(`Import has ${preview.invalidCount} invalid row(s).`);
+        return;
+      }
+
+      if (!window.confirm(`Import ${preview.validCount} valid row(s)?`)) {
+        return;
+      }
+
+      await commitPeopleImport(csv);
+      await reloadPeople();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to import file.");
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -362,11 +413,36 @@ export default function App() {
             <Plus aria-hidden="true" size={16} />
             {labels.addPerson}
           </button>
-          <button type="button" title={labels.import} aria-label={labels.import}>
+          <input
+            ref={importInputRef}
+            className="hidden-file-input"
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleImportFile}
+          />
+          <button
+            type="button"
+            title={labels.import}
+            aria-label={labels.import}
+            onClick={() => importInputRef.current?.click()}
+          >
             <Upload aria-hidden="true" size={16} />
           </button>
-          <button type="button" title={labels.export} aria-label={labels.export}>
+          <button
+            type="button"
+            title={labels.export}
+            aria-label={labels.export}
+            onClick={() => void downloadApiFile("/api/export/people.csv", "people.csv")}
+          >
             <Download aria-hidden="true" size={16} />
+          </button>
+          <button
+            type="button"
+            title={labels.backup}
+            aria-label={labels.backup}
+            onClick={() => void downloadApiFile("/api/export/backup", "family-registry-backup.json")}
+          >
+            {labels.backup}
           </button>
           <label className="language-select">
             <span>{labels.language}</span>

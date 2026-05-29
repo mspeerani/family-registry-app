@@ -143,3 +143,19 @@ Decision: The first graph export format is SVG.
 Reason: SVG is a real image format, preserves text and edges clearly, and can later be converted to PDF if required.
 
 Date: 2026-05-29
+
+## D-019 - Backup Format
+
+Decision: Use JSON backup export for `v0.9.0`.
+
+Reason: JSON backup is portable, testable, and avoids exposing raw SQLite file paths through the API. It can be extended to include more tables as the app grows.
+
+Date: 2026-05-29
+
+## D-020 - CSV Import Scope
+
+Decision: `v0.9.0` supports people CSV import preview and commit. Relationship CSV import remains a later enhancement.
+
+Reason: Person import is the highest-value first data migration path. Relationship import needs stronger duplicate and direction review before enabling commit.
+
+Date: 2026-05-29

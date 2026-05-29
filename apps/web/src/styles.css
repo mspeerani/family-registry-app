@@ -111,6 +111,10 @@ select:focus-visible {
   padding: 5px 8px;
 }
 
+.hidden-file-input {
+  display: none;
+}
+
 .workspace {
   display: grid;
   gap: 12px;

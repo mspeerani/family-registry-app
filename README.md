@@ -57,6 +57,7 @@ v0.5.0 - relationships and derived family links
 v0.6.0 - search filters and reminders
 v0.7.0 - multilingual UI hardening
 v0.8.0 - family tree and knowledge graph views
+v0.9.0 - import/export/backup and hardening notes
 ```
 
 Before every release, run:

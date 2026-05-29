@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 7 - Family Tree And Knowledge Graph
+Phase: 8 - Import, Export, Backup, And Hardening
 
 Current release target:
 
 ```text
-v0.8.0 - family tree and knowledge graph views
+v0.9.0 - import/export/backup and hardening notes
 ```
 
 Previous release:
 
 ```text
-v0.7.0 - multilingual UI hardening
+v0.8.0 - family tree and knowledge graph views
 ```
 
 ## Scope Boundary
@@ -67,16 +67,16 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.8.0`, the next target is:
+After `v0.9.0`, the next target is:
 
 ```text
-v0.9.0 - import/export/backup and production hardening
+v1.0.0 - production-ready release
 ```
 
-Expected `v0.9.0` contents:
+Expected `v1.0.0` contents:
 
-- CSV export
-- CSV import preview
-- Backup and restore
-- Production hardening pass
-- Release notes draft
+- Final acceptance audit
+- Docker verification if Docker is available
+- Backup/restore warning review
+- Release notes
+- Production readiness declaration or documented exceptions

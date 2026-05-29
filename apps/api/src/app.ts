@@ -5,6 +5,7 @@ import type { DatabaseSync } from "node:sqlite";
 
 import { type AppConfig, getConfig, redactDatabaseUrl } from "./config.js";
 import type { DatabaseHealth } from "./db/database.js";
+import { createDataTransferRouter } from "./dataTransfer/dataTransferRoutes.js";
 import { createPeopleRouter } from "./people/personRoutes.js";
 import { createRelationshipRouter } from "./relationships/relationshipRoutes.js";
 import { createReminderRouter } from "./reminders/reminderRoutes.js";
@@ -40,6 +41,7 @@ export function createApp(
   });
 
   if (services.database) {
+    app.use("/api", createDataTransferRouter(services.database));
     app.use("/api/people", createPeopleRouter(services.database));
     app.use("/api/relationships", createRelationshipRouter(services.database));
     app.use("/api/reminders", createReminderRouter(services.database));
