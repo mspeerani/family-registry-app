@@ -168,3 +168,13 @@ Recommended person fields:
 - `full_name`: primary name, usually English or preferred display text.
 - `native_name`: optional local-script name.
 
+## 8. Implementation Status
+
+As of `v0.7.0`:
+
+- UI locale supports English, Urdu, and Gujarati.
+- Urdu applies `dir="rtl"` at the document root.
+- English and Gujarati apply `dir="ltr"` at the document root.
+- Selected locale is persisted in browser local storage.
+- Urdu and Gujarati source strings are stored as Unicode escapes to prevent encoding drift.
+- Translation tests verify key coverage, direction metadata, persisted locale behavior, and common mojibake markers.

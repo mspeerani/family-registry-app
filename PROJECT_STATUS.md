@@ -2,18 +2,18 @@
 
 ## Current Phase
 
-Phase: 5 - Search And Reminders
+Phase: 6 - Multilingual UI Hardening
 
 Current release target:
 
 ```text
-v0.6.0 - search filters and reminders
+v0.7.0 - multilingual UI hardening
 ```
 
 Previous release:
 
 ```text
-v0.5.0 - relationships and derived family links
+v0.6.0 - search filters and reminders
 ```
 
 ## Scope Boundary
@@ -67,16 +67,16 @@ No phase is complete until the relevant checkpoint gate passes.
 
 ## Immediate Next Phase
 
-After `v0.6.0`, the next target is:
+After `v0.7.0`, the next target is:
 
 ```text
-v0.7.0 - multilingual UI hardening
+v0.8.0 - family tree and knowledge graph
 ```
 
-Expected `v0.7.0` contents:
+Expected `v0.8.0` contents:
 
-- Persisted language preference
-- Urdu RTL smoke verification
-- Gujarati layout smoke verification
-- Translation coverage check
-- Multilingual UI cleanup
+- Family tree view for selected person
+- Knowledge graph view for selected person
+- Depth controls
+- Node click/profile behavior
+- Export placeholder or implementation decision

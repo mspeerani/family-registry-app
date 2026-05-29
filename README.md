@@ -55,6 +55,7 @@ v0.3.0 - database foundation and migrations
 v0.4.0 - SQLite-backed person registry
 v0.5.0 - relationships and derived family links
 v0.6.0 - search filters and reminders
+v0.7.0 - multilingual UI hardening
 ```
 
 Before every release, run:

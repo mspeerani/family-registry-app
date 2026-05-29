@@ -111,3 +111,19 @@ Decision: Reminder windows include only Gregorian dates with known month and day
 Reason: Year-only and approximate dates cannot produce reliable daily reminders. Hijri reminder logic remains a later enhancement after manual/auto Hijri handling is complete.
 
 Date: 2026-05-29
+
+## D-015 - ASCII-Safe Translation Source
+
+Decision: Urdu and Gujarati UI strings are stored with Unicode escape sequences in source code.
+
+Reason: The project previously showed mojibake in shell output. ASCII-safe source prevents editor/terminal encoding drift while still rendering proper Urdu and Gujarati in the browser.
+
+Date: 2026-05-29
+
+## D-016 - Persisted Locale Preference
+
+Decision: The web app stores the selected locale in browser local storage.
+
+Reason: Users should not need to reselect English, Urdu, or Gujarati on every app launch.
+
+Date: 2026-05-29

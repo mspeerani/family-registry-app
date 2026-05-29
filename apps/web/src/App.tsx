@@ -23,13 +23,22 @@ import {
   type Person,
   type ReminderWindow
 } from "./api";
-import { localeMeta, t, type Locale } from "./i18n";
+import {
+  applyDocumentLocale,
+  getStoredLocale,
+  localeMeta,
+  persistLocale,
+  t,
+  type Locale
+} from "./i18n";
 import { emptyPersonForm, formFromPerson, toPersonPayload, type PersonForm } from "./personForm";
 
 type Mode = "view" | "edit" | "new";
 
 export default function App() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(() =>
+    getStoredLocale(typeof window === "undefined" ? undefined : window.localStorage)
+  );
   const [query, setQuery] = useState("");
   const [missingBirthDate, setMissingBirthDate] = useState(false);
   const [missingFatherName, setMissingFatherName] = useState(false);
@@ -55,6 +64,10 @@ export default function App() {
       cancel: t(locale, "cancel"),
       children: t(locale, "children"),
       confidence: t(locale, "confidence"),
+      confidenceApproximate: t(locale, "confidenceApproximate"),
+      confidenceConfirmed: t(locale, "confidenceConfirmed"),
+      confidenceLikely: t(locale, "confidenceLikely"),
+      confidenceUnknown: t(locale, "confidenceUnknown"),
       deathDate: t(locale, "deathDate"),
       deathPlace: t(locale, "deathPlace"),
       edit: t(locale, "edit"),
@@ -77,6 +90,13 @@ export default function App() {
       registry: t(locale, "registry"),
       relatedPerson: t(locale, "relatedPerson"),
       relationshipType: t(locale, "relationshipType"),
+      relationshipChild: t(locale, "relationshipChild"),
+      relationshipFather: t(locale, "relationshipFather"),
+      relationshipGuardian: t(locale, "relationshipGuardian"),
+      relationshipMother: t(locale, "relationshipMother"),
+      relationshipOther: t(locale, "relationshipOther"),
+      relationshipSibling: t(locale, "relationshipSibling"),
+      relationshipSpouse: t(locale, "relationshipSpouse"),
       relationships: t(locale, "relationships"),
       reminders: t(locale, "reminders"),
       save: t(locale, "save"),
@@ -89,8 +109,8 @@ export default function App() {
   );
 
   useEffect(() => {
-    document.documentElement.lang = locale;
-    document.documentElement.dir = localeMeta[locale].dir;
+    applyDocumentLocale(locale, document.documentElement);
+    persistLocale(locale, window.localStorage);
   }, [locale]);
 
   async function loadPeopleRecords() {
@@ -474,10 +494,10 @@ export default function App() {
                 value={form.dataConfidence}
                 onChange={(event) => updateForm("dataConfidence", event.target.value)}
               >
-                <option value="unknown">unknown</option>
-                <option value="approximate">approximate</option>
-                <option value="likely">likely</option>
-                <option value="confirmed">confirmed</option>
+                <option value="unknown">{labels.confidenceUnknown}</option>
+                <option value="approximate">{labels.confidenceApproximate}</option>
+                <option value="likely">{labels.confidenceLikely}</option>
+                <option value="confirmed">{labels.confidenceConfirmed}</option>
               </select>
             </label>
             <label>
@@ -526,13 +546,13 @@ export default function App() {
                       value={relationshipType}
                       onChange={(event) => setRelationshipType(event.target.value)}
                     >
-                      <option value="father">father</option>
-                      <option value="mother">mother</option>
-                      <option value="spouse">spouse</option>
-                      <option value="child">child</option>
-                      <option value="sibling">sibling</option>
-                      <option value="guardian">guardian</option>
-                      <option value="other">other</option>
+                      <option value="father">{labels.relationshipFather}</option>
+                      <option value="mother">{labels.relationshipMother}</option>
+                      <option value="spouse">{labels.relationshipSpouse}</option>
+                      <option value="child">{labels.relationshipChild}</option>
+                      <option value="sibling">{labels.relationshipSibling}</option>
+                      <option value="guardian">{labels.relationshipGuardian}</option>
+                      <option value="other">{labels.relationshipOther}</option>
                     </select>
                   </label>
                   <label>

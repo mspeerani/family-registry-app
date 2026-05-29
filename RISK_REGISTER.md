@@ -16,6 +16,7 @@
 | R-012 | Public demo UI could encourage entering real data before auth/backup exists | High | Medium | Keep repo warnings, ignored database files, and delay real data entry until production controls are complete | Open |
 | R-013 | Users may misunderstand relationship direction when linking people | Medium | Medium | Document convention and keep UI labels focused on selected person relationship context | Open |
 | R-014 | Reminder date logic could mishandle partial or Hijri-only dates | Medium | Medium | Include only exact Gregorian month/day dates for now; add Hijri-specific tests in later phase | Open |
+| R-015 | Urdu/Gujarati text can become mojibake through encoding drift | High | Medium | Store translated source strings as Unicode escapes and test for mojibake markers | Mitigated |
 
 ## Risk Handling Rule
 
