@@ -61,6 +61,7 @@ Default URLs:
 ```text
 API: http://localhost:3001/api/health
 Web: http://localhost:5173
+Alt: http://127.0.0.1:5173
 ```
 
 ## Authentication Configuration

@@ -9,7 +9,7 @@ const configSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   APP_PORT: z.coerce.number().int().positive().default(3001),
-  CORS_ORIGIN: z.string().default("http://localhost:5173"),
+  CORS_ORIGIN: z.string().default("http://localhost:5173,http://127.0.0.1:5173"),
   DATABASE_URL: z.string().default("file:./data/family_registry.sqlite"),
   DEFAULT_LOCALE: z.enum(["en", "ur", "gu"]).default("en"),
   SESSION_SECRET: z.string().optional(),

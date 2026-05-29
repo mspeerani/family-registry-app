@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ??
+  (typeof window === "undefined" ? "http://localhost:3001" : `${window.location.protocol}//${window.location.hostname}:3001`);
 
 export function apiUrl(path: string): string {
   return `${API_BASE_URL}${path}`;

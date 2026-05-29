@@ -87,6 +87,7 @@ Default local URLs:
 ```text
 API health: http://localhost:3001/api/health
 Web app:    http://localhost:5173
+Alt web:    http://127.0.0.1:5173
 ```
 
 Run quality checks:
